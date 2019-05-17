@@ -1,2 +1,2 @@
-# gfx_imageio
-Loads and saves images to gfx_image types from a variety of formats
+# gfx_image_impl_basic
+basic gfx_image implementation probably not optimised but should be portable
