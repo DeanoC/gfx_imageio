@@ -32,8 +32,8 @@ static void TestExr(char const *filename, bool tiled = false) {
   int ret = TinyExr_ParseEXRVersion(&exr_version, file);
   REQUIRE(TINYEXR_SUCCESS == ret);
   REQUIRE(tiled == (exr_version.tiled == 1));
-  REQUIRE(exr_version.non_image);
-  REQUIRE(exr_version.multipart);
+  REQUIRE(!exr_version.non_image);
+  REQUIRE(!exr_version.multipart);
 
   TinyExr_EXRHeader header;
   file->Seek(0, VFile_SD_Begin);
@@ -41,6 +41,7 @@ static void TestExr(char const *filename, bool tiled = false) {
   REQUIRE(TINYEXR_SUCCESS == ret);
   TinyExr_EXRImage exrImage;
   TinyExr_InitEXRImage(&exrImage);
+	file->Seek(0, VFile_SD_Begin);
   ret = TinyExr_LoadEXRImage(&exrImage, &header, file);
   REQUIRE(TINYEXR_SUCCESS == ret);
   REQUIRE(exrImage.width == image->width);

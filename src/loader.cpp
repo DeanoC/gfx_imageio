@@ -497,6 +497,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadEXR(VFile_Handle handle) {
   EXRImage exrImage;
   InitEXRImage(&exrImage);
 
+	file->Seek(0, VFile_SD_Begin);
   ret = LoadEXRImage(&exrImage, &header, handle);
   if (ret != 0) {
     LOGERRORF("Load EXR error\n");

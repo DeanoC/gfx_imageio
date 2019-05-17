@@ -39,6 +39,7 @@ set( Tests
 		test_imageio.cpp
 		)
 set( TestDeps
+		utils_simple_logmanager
 		gfx_image_impl_basic
 		al2o3_catch2 )
 ADD_LIB_TESTS(${LibName} "${Interface}" "${Tests}" "${TestDeps}")
