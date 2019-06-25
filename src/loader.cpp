@@ -375,6 +375,8 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadLDR(VFile_Handle handle) {
       &stbIoCallbackEof
   };
 
+  size_t origin = VFile_Tell(handle);
+
   int w = 0, h = 0, cmp = 0, requiredCmp = 0;
   stbi_info_from_callbacks(&callbacks, handle, &w, &h, &cmp);
 
@@ -401,6 +403,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadLDR(VFile_Handle handle) {
       break;
   }
 
+  VFile_Seek(handle, origin, VFile_SD_Begin);
   stbi_uc *uncompressed = stbi_load_from_callbacks(&callbacks, handle, &w, &h, &cmp, requiredCmp);
   if (uncompressed == nullptr) {
     return nullptr;
@@ -598,26 +601,28 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_Load(VFile_Handle handle) {
   VFile::File *file = VFile::File::FromHandle(handle);
   tinystl::string_view name = file->GetName();
 
-  if( auto pos = name.rfind('.') != tinystl::string_view::npos ) {
-    tinystl::string_view ext(name.data()+pos+1, name.size()-pos );
+  if( auto pos = name.rfind('.') ) {
+  	if(pos == tinystl::string_view::npos ) return nullptr;
+
+    tinystl::string_view ext(name.data()+pos+1, name.size()-pos-1 );
     switch(Utils::CompileTimeHash(ext) ) {
-      case ".dds"_hash:
+      case "dds"_hash:
         return Image_LoadDDS(handle);
-      case ".pvr"_hash:
+      case "pvr"_hash:
         return Image_LoadPVR(handle);
-      case ".exr"_hash:
+      case "exr"_hash:
         return Image_LoadEXR(handle);
-      case ".hdr"_hash:
+      case "hdr"_hash:
         return Image_LoadHDR(handle);
-      case ".jpg"_hash:
-      case ".jpeg"_hash:
-      case ".png"_hash:
-      case ".tga"_hash:
-      case ".bmp"_hash:
-      case ".psd"_hash:
-      case ".gif"_hash:
-      case ".pic"_hash:
-      case ".pnm"_hash:
+      case "jpg"_hash:
+      case "jpeg"_hash:
+      case "png"_hash:
+      case "tga"_hash:
+      case "bmp"_hash:
+      case "psd"_hash:
+      case "gif"_hash:
+      case "pic"_hash:
+      case "pnm"_hash:
         return Image_LoadLDR(handle);
       default:
         return nullptr;

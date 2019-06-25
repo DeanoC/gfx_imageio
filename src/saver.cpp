@@ -6,10 +6,13 @@
 #include "gfx_imageformat/formatcracker.h"
 #include "gfx_image/image.h"
 #include "gfx_image/utils.h"
-//#include "syoyo/tiny_exr.hpp"
 #include "dds.hpp"
 #include <float.h>
 
+// TODO EXR
+//#include "syoyo/tiny_exr.hpp"
+
+// currentlybelieved to be broken!
 AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle) {
   using namespace Image;
 
