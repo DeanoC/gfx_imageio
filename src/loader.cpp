@@ -32,7 +32,7 @@ const unsigned int gPvrtexV3HeaderVersion = 0x03525650;
 
 // Load Image Data form mData functions
 
-AL2O3_EXTERN_C Image_ImageHeader *Image_LoadDDS(VFile_Handle handle) {
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
   using namespace Image;
   DDSHeader header;
 
@@ -43,7 +43,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadDDS(VFile_Handle handle) {
     return nullptr;
   }
 
-  Image_ImageHeader *image = nullptr;
+  Image_ImageHeader const *image = nullptr;
   ImageFormat format = ImageFormat_UNDEFINED;
 
   if (header.mPixelFormat.mDWFourCC == MAKE_CHAR4('D', 'X', '1', '0')) {
@@ -286,7 +286,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadDDS(VFile_Handle handle) {
   return image;
 }
 
-AL2O3_EXTERN_C Image_ImageHeader *Image_LoadPVR(VFile_Handle handle) {
+AL2O3_EXTERN_C Image_ImageHeader const * Image_LoadPVR(VFile_Handle handle) {
   // TODO: Image
   // - no support for PVRTC2 at the moment since it isn't supported on iOS devices.
   // - only new PVR header V3 is supported at the moment.  Should we add legacy for V2 and V1?
@@ -345,7 +345,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadPVR(VFile_Handle handle) {
   file->Seek(header.mMetaDataSize, VFile_SD_Current);
 
   // Create and extract the pixel data
-  Image_ImageHeader *image = Image_Create(width, height, depth, slices, format);
+  auto image = Image_Create(width, height, depth, slices, format);
 
   file->Read(Image_RawDataPtr(image), Image_ByteCountOf(image));
   // TODO we should skip to the end here, but we
@@ -367,7 +367,7 @@ static int stbIoCallbackEof(void *user) {
   return VFile_IsEOF(handle);
 }
 
-AL2O3_EXTERN_C Image_ImageHeader *Image_LoadLDR(VFile_Handle handle) {
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadLDR(VFile_Handle handle) {
 
   stbi_io_callbacks callbacks{
       &stbIoCallbackRead,
@@ -410,7 +410,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadLDR(VFile_Handle handle) {
   }
 
   // Create and extract the pixel data
-  Image_ImageHeader *image = Image_Create(w, h, 1, 1, format);
+  auto image = Image_Create(w, h, 1, 1, format);
   ASSERT(memoryRequirement == Image_ByteCountOf(image));
 
   memcpy(Image_RawDataPtr(image), uncompressed, memoryRequirement);
@@ -418,7 +418,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadLDR(VFile_Handle handle) {
   return image;
 }
 
-AL2O3_EXTERN_C Image_ImageHeader *Image_LoadHDR(VFile_Handle handle) {
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadHDR(VFile_Handle handle) {
 
   stbi_io_callbacks callbacks{
       &stbIoCallbackRead,
@@ -455,7 +455,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadHDR(VFile_Handle handle) {
   }
 
   // Create and extract the pixel data
-  Image_ImageHeader *image = Image_Create(w, h, 1, 1, format);
+  auto image = Image_Create(w, h, 1, 1, format);
   ASSERT(memoryRequirement == Image_ByteCountOf(image));
 
   memcpy(Image_RawDataPtr(image), uncompressed, memoryRequirement);
@@ -463,7 +463,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadHDR(VFile_Handle handle) {
   return image;
 }
 
-AL2O3_EXTERN_C Image_ImageHeader *Image_LoadEXR(VFile_Handle handle) {
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
   VFile::File *file = VFile::File::FromHandle(handle);
 
   using namespace tinyexr;
@@ -574,7 +574,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadEXR(VFile_Handle handle) {
   }
 
   // Create and extract the pixel data
-  Image_ImageHeader *image = Image_Create(exrImage.width, exrImage.height, 1, 1, format);
+  auto image = Image_Create(exrImage.width, exrImage.height, 1, 1, format);
 
   if(firstPixelType == TINYEXR_PIXELTYPE_FLOAT) {
     float* out = (float*)Image_RawDataPtr(image);
@@ -597,7 +597,7 @@ AL2O3_EXTERN_C Image_ImageHeader *Image_LoadEXR(VFile_Handle handle) {
   return image;
 }
 
-AL2O3_EXTERN_C Image_ImageHeader *Image_Load(VFile_Handle handle) {
+AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
   VFile::File *file = VFile::File::FromHandle(handle);
   tinystl::string_view name = file->GetName();
 
