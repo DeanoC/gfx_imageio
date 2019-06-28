@@ -609,18 +609,18 @@ static size_t tinyktxCallbackRead(void *user, void* data, size_t size) {
 	auto handle = (VFile_Handle) user;
 	return VFile_Read(handle, data, size);
 }
-bool tinyktxCallbackSeek(void *user, int64_t offset) {
+static bool tinyktxCallbackSeek(void *user, int64_t offset) {
 	auto handle = (VFile_Handle) user;
 	return VFile_Seek(handle, offset, VFile_SD_Begin);
 
 }
-int64_t tinyktxCallbackTell(void *user) {
+static int64_t tinyktxCallbackTell(void *user) {
 	auto handle = (VFile_Handle) user;
 	return VFile_Tell(handle);
 
 }
 
-void tinyktxCallbackError(void *user, char const *msg) {
+static void tinyktxCallbackError(void *user, char const *msg) {
 	LOGERRORF("Tiny_Ktx ERROR: %s", msg);
 }
 
@@ -777,13 +777,13 @@ static ImageFormat ImageFormatToTinyKtxFormat(TinyKtx_Format format) {
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
-	TinyKtx_Callbacks callbacks = {
-			.error  = &tinyktxCallbackError,
-			.alloc = &tinyktxCallbackAlloc,
-			.free = &tinyktxCallbackFree,
-			.read = &tinyktxCallbackRead,
-			.seek = &tinyktxCallbackSeek,
-			.tell = &tinyktxCallbackTell
+	TinyKtx_Callbacks callbacks {
+			&tinyktxCallbackError,
+			&tinyktxCallbackAlloc,
+			&tinyktxCallbackFree,
+			tinyktxCallbackRead,
+			&tinyktxCallbackSeek,
+			&tinyktxCallbackTell
 	};
 
 	auto ctx =  TinyKtx_CreateContext( &callbacks, handle);

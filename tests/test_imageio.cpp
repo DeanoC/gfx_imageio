@@ -25,7 +25,7 @@ static void TestExr(char const *filename, bool tiled = false) {
   VFile::ScopedFile file = VFile::File::FromFile(filename, Os_FM_ReadBinary);
   REQUIRE(file);
 
-  Image_ImageHeader* image = Image_LoadEXR(file);
+  Image_ImageHeader const* image = Image_LoadEXR(file);
   REQUIRE(image != nullptr);
 
   file->Seek(0, VFile_SD_Begin);

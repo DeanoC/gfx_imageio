@@ -623,6 +623,9 @@ static TinyKtx_Format ImageFormatToTinyKtxFormat(ImageFormat format) {
 	};
 
 }
+static void tinyktxCallbackError(void *user, char const *msg) {
+	LOGERRORF("Tiny_Ktx ERROR: %s", msg);
+}
 
 static void *tinyktxCallbackAlloc(void *user, size_t size) {
 	return MEMORY_MALLOC(size);
@@ -640,9 +643,10 @@ static void tinyktxCallbackWrite(void *user, void const *data, size_t size) {
 AL2O3_EXTERN_C bool Image_SaveKTX(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 	TinyKtx_WriteCallbacks callback{
-			.write = tinyktxCallbackWrite,
-			.alloc = tinyktxCallbackAlloc,
-			.free = tinyktxCallbackFree
+		&tinyktxCallbackError,
+		&tinyktxCallbackAlloc,
+		&tinyktxCallbackFree,
+		&tinyktxCallbackWrite,
 	};
 
 	TinyKtx_Format fmt = ImageFormatToTinyKtxFormat(image->format);
@@ -653,7 +657,7 @@ AL2O3_EXTERN_C bool Image_SaveKTX(Image_ImageHeader *image, VFile_Handle handle)
 			image->nextType != Image_NextType::Image_IT_None	) {
 		return false;
 	}
-	size_t numMipmaps = (image->nextType == Image_NextType::Image_IT_None) ? 1 : Image_LinkedImageCountOf(image);
+	uint32_t numMipmaps = (image->nextType == Image_NextType::Image_IT_None) ? 1 : (uint32_t)Image_LinkedImageCountOf(image);
 
 	uint32_t mipmapsizes[TINYKTX_MAX_MIPMAPLEVELS];
 	void const* mipmaps[TINYKTX_MAX_MIPMAPLEVELS];
