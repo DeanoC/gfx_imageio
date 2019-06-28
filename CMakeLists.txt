@@ -31,6 +31,7 @@ set(Deps
 		gfx_imageformat
 		gfx_image_interface
 		utils_misccpp
+		tiny_ktx
 		)
 ADD_LIB(${LibName} "${Interface}" "${Src}" "${Deps}")
 

@@ -10,6 +10,7 @@
 #include "utils_misccpp/compiletimehash.hpp"
 #include "dds.hpp"
 #include <float.h>
+#include "tiny_ktx/tinyktx.h"
 
 // Describes the header of a PVR header-texture
 typedef struct PVR_Header_Texture_TAG {
@@ -596,6 +597,230 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 
   return image;
 }
+static void *tinyktxCallbackAlloc(void *user, size_t size) {
+	return MEMORY_MALLOC(size);
+}
+
+static void tinyktxCallbackFree(void *user, void *data) {
+	MEMORY_FREE(data);
+}
+
+static size_t tinyktxCallbackRead(void *user, void* data, size_t size) {
+	auto handle = (VFile_Handle) user;
+	return VFile_Read(handle, data, size);
+}
+bool tinyktxCallbackSeek(void *user, int64_t offset) {
+	auto handle = (VFile_Handle) user;
+	return VFile_Seek(handle, offset, VFile_SD_Begin);
+
+}
+int64_t tinyktxCallbackTell(void *user) {
+	auto handle = (VFile_Handle) user;
+	return VFile_Tell(handle);
+
+}
+
+void tinyktxCallbackError(void *user, char const *msg) {
+	LOGERRORF("Tiny_Ktx ERROR: %s", msg);
+}
+
+static ImageFormat ImageFormatToTinyKtxFormat(TinyKtx_Format format) {
+	switch(format) {
+		case TKTX_UNDEFINED: return ImageFormat_UNDEFINED;
+		case TKTX_R4G4_UNORM_PACK8: return ImageFormat_R4G4_UNORM_PACK8;
+		case TKTX_R4G4B4A4_UNORM_PACK16: return ImageFormat_R4G4B4A4_UNORM_PACK16;
+		case TKTX_B4G4R4A4_UNORM_PACK16: return ImageFormat_B4G4R4A4_UNORM_PACK16;
+		case TKTX_R5G6B5_UNORM_PACK16: return ImageFormat_R5G6B5_UNORM_PACK16;
+		case TKTX_B5G6R5_UNORM_PACK16: return ImageFormat_B5G6R5_UNORM_PACK16;
+		case TKTX_R5G5B5A1_UNORM_PACK16: return ImageFormat_R5G5B5A1_UNORM_PACK16;
+		case TKTX_B5G5R5A1_UNORM_PACK16: return ImageFormat_B5G5R5A1_UNORM_PACK16;
+		case TKTX_A1R5G5B5_UNORM_PACK16: return ImageFormat_A1R5G5B5_UNORM_PACK16;
+		case TKTX_R8_UNORM: return ImageFormat_R8_UNORM;
+		case TKTX_R8_SNORM: return ImageFormat_R8_SNORM;
+		case TKTX_R8_UINT: return ImageFormat_R8_UINT;
+		case TKTX_R8_SINT: return ImageFormat_R8_SINT;
+		case TKTX_R8_SRGB: return ImageFormat_R8_SRGB;
+		case TKTX_R8G8_UNORM: return ImageFormat_R8G8_UNORM;
+		case TKTX_R8G8_SNORM: return ImageFormat_R8G8_SNORM;
+		case TKTX_R8G8_UINT: return ImageFormat_R8G8_UINT;
+		case TKTX_R8G8_SINT: return ImageFormat_R8G8_SINT;
+		case TKTX_R8G8_SRGB: return ImageFormat_R8G8_SRGB;
+		case TKTX_R8G8B8_UNORM: return ImageFormat_R8G8B8_UNORM;
+		case TKTX_R8G8B8_SNORM: return ImageFormat_R8G8B8_SNORM;
+		case TKTX_R8G8B8_UINT: return ImageFormat_R8G8B8_UINT;
+		case TKTX_R8G8B8_SINT: return ImageFormat_R8G8B8_SINT;
+		case TKTX_R8G8B8_SRGB: return ImageFormat_R8G8B8_SRGB;
+		case TKTX_B8G8R8_UNORM: return ImageFormat_B8G8R8_UNORM;
+		case TKTX_B8G8R8_SNORM: return ImageFormat_B8G8R8_SNORM;
+		case TKTX_B8G8R8_UINT: return ImageFormat_B8G8R8_UINT;
+		case TKTX_B8G8R8_SINT: return ImageFormat_B8G8R8_SINT;
+		case TKTX_B8G8R8_SRGB: return ImageFormat_B8G8R8_SRGB;
+		case TKTX_R8G8B8A8_UNORM: return ImageFormat_R8G8B8A8_UNORM;
+		case TKTX_R8G8B8A8_SNORM: return ImageFormat_R8G8B8A8_SNORM;
+		case TKTX_R8G8B8A8_UINT: return ImageFormat_R8G8B8A8_UINT;
+		case TKTX_R8G8B8A8_SINT: return ImageFormat_R8G8B8A8_SINT;
+		case TKTX_R8G8B8A8_SRGB: return ImageFormat_R8G8B8A8_SRGB;
+		case TKTX_B8G8R8A8_UNORM: return ImageFormat_B8G8R8A8_UNORM;
+		case TKTX_B8G8R8A8_SNORM: return ImageFormat_B8G8R8A8_SNORM;
+		case TKTX_B8G8R8A8_UINT: return ImageFormat_B8G8R8A8_UINT;
+		case TKTX_B8G8R8A8_SINT: return ImageFormat_B8G8R8A8_SINT;
+		case TKTX_B8G8R8A8_SRGB: return ImageFormat_B8G8R8A8_SRGB;
+		case TKTX_A8B8G8R8_UNORM_PACK32: return ImageFormat_A8B8G8R8_UNORM_PACK32;
+		case TKTX_A8B8G8R8_SNORM_PACK32: return ImageFormat_A8B8G8R8_SNORM_PACK32;
+		case TKTX_A8B8G8R8_UINT_PACK32: return ImageFormat_A8B8G8R8_UINT_PACK32;
+		case TKTX_A8B8G8R8_SINT_PACK32: return ImageFormat_A8B8G8R8_SINT_PACK32;
+		case TKTX_A8B8G8R8_SRGB_PACK32: return ImageFormat_A8B8G8R8_SRGB_PACK32;
+		case TKTX_E5B9G9R9_UFLOAT_PACK32: return ImageFormat_E5B9G9R9_UFLOAT_PACK32;
+		case TKTX_A2R10G10B10_UNORM_PACK32: return ImageFormat_A2R10G10B10_UNORM_PACK32;
+		case TKTX_A2R10G10B10_UINT_PACK32: return ImageFormat_A2R10G10B10_UINT_PACK32;
+		case TKTX_A2B10G10R10_UNORM_PACK32: return ImageFormat_A2B10G10R10_UNORM_PACK32;
+		case TKTX_A2B10G10R10_UINT_PACK32: return ImageFormat_A2B10G10R10_UINT_PACK32;
+		case TKTX_B10G11R11_UFLOAT_PACK32: return ImageFormat_B10G11R11_UFLOAT_PACK32;
+		case TKTX_R16_UNORM: return ImageFormat_R16_UNORM;
+		case TKTX_R16_SNORM: return ImageFormat_R16_SNORM;
+		case TKTX_R16_UINT: return ImageFormat_R16_UINT;
+		case TKTX_R16_SINT: return ImageFormat_R16_SINT;
+		case TKTX_R16_SFLOAT: return ImageFormat_R16_SFLOAT;
+		case TKTX_R16G16_UNORM: return ImageFormat_R16G16_UNORM;
+		case TKTX_R16G16_SNORM: return ImageFormat_R16G16_SNORM;
+		case TKTX_R16G16_UINT: return ImageFormat_R16G16_UINT;
+		case TKTX_R16G16_SINT: return ImageFormat_R16G16_SINT;
+		case TKTX_R16G16_SFLOAT: return ImageFormat_R16G16_SFLOAT;
+		case TKTX_R16G16B16_UNORM: return ImageFormat_R16G16B16_UNORM;
+		case TKTX_R16G16B16_SNORM: return ImageFormat_R16G16B16_SNORM;
+		case TKTX_R16G16B16_UINT: return ImageFormat_R16G16B16_UINT;
+		case TKTX_R16G16B16_SINT: return ImageFormat_R16G16B16_SINT;
+		case TKTX_R16G16B16_SFLOAT: return ImageFormat_R16G16B16_SFLOAT;
+		case TKTX_R16G16B16A16_UNORM: return ImageFormat_R16G16B16A16_UNORM;
+		case TKTX_R16G16B16A16_SNORM: return ImageFormat_R16G16B16A16_SNORM;
+		case TKTX_R16G16B16A16_UINT: return ImageFormat_R16G16B16A16_UINT;
+		case TKTX_R16G16B16A16_SINT: return ImageFormat_R16G16B16A16_SINT;
+		case TKTX_R16G16B16A16_SFLOAT: return ImageFormat_R16G16B16A16_SFLOAT;
+		case TKTX_R32_UINT: return ImageFormat_R32_UINT;
+		case TKTX_R32_SINT: return ImageFormat_R32_SINT;
+		case TKTX_R32_SFLOAT: return ImageFormat_R32_SFLOAT;
+		case TKTX_R32G32_UINT: return ImageFormat_R32G32_UINT;
+		case TKTX_R32G32_SINT: return ImageFormat_R32G32_SINT;
+		case TKTX_R32G32_SFLOAT: return ImageFormat_R32G32_SFLOAT;
+		case TKTX_R32G32B32_UINT: return ImageFormat_R32G32B32_UINT;
+		case TKTX_R32G32B32_SINT: return ImageFormat_R32G32B32_SINT;
+		case TKTX_R32G32B32_SFLOAT: return ImageFormat_R32G32B32_SFLOAT;
+		case TKTX_R32G32B32A32_UINT: return ImageFormat_R32G32B32A32_UINT;
+		case TKTX_R32G32B32A32_SINT: return ImageFormat_R32G32B32A32_SINT;
+		case TKTX_R32G32B32A32_SFLOAT: return ImageFormat_R32G32B32A32_SFLOAT;
+		case TKTX_BC1_RGB_UNORM_BLOCK: return ImageFormat_BC1_RGB_UNORM_BLOCK;
+		case TKTX_BC1_RGB_SRGB_BLOCK: return ImageFormat_BC1_RGB_SRGB_BLOCK;
+		case TKTX_BC1_RGBA_UNORM_BLOCK: return ImageFormat_BC1_RGBA_UNORM_BLOCK;
+		case TKTX_BC1_RGBA_SRGB_BLOCK: return ImageFormat_BC1_RGBA_SRGB_BLOCK;
+		case TKTX_BC2_UNORM_BLOCK: return ImageFormat_BC2_UNORM_BLOCK;
+		case TKTX_BC2_SRGB_BLOCK: return ImageFormat_BC2_SRGB_BLOCK;
+		case TKTX_BC3_UNORM_BLOCK: return ImageFormat_BC3_UNORM_BLOCK;
+		case TKTX_BC3_SRGB_BLOCK: return ImageFormat_BC3_SRGB_BLOCK;
+		case TKTX_BC4_UNORM_BLOCK: return ImageFormat_BC4_UNORM_BLOCK;
+		case TKTX_BC4_SNORM_BLOCK: return ImageFormat_BC4_SNORM_BLOCK;
+		case TKTX_BC5_UNORM_BLOCK: return ImageFormat_BC5_UNORM_BLOCK;
+		case TKTX_BC5_SNORM_BLOCK: return ImageFormat_BC5_SNORM_BLOCK;
+		case TKTX_BC6H_UFLOAT_BLOCK: return ImageFormat_BC6H_UFLOAT_BLOCK;
+		case TKTX_BC6H_SFLOAT_BLOCK: return ImageFormat_BC6H_SFLOAT_BLOCK;
+		case TKTX_BC7_UNORM_BLOCK: return ImageFormat_BC7_UNORM_BLOCK;
+		case TKTX_BC7_SRGB_BLOCK: return ImageFormat_BC7_SRGB_BLOCK;
+		case TKTX_PVR_2BPP_BLOCK: return ImageFormat_PVR_2BPP_BLOCK;
+		case TKTX_PVR_2BPPA_BLOCK: return ImageFormat_PVR_2BPPA_BLOCK;
+		case TKTX_PVR_4BPP_BLOCK: return ImageFormat_PVR_4BPP_BLOCK;
+		case TKTX_PVR_4BPPA_BLOCK: return ImageFormat_PVR_4BPPA_BLOCK;
+		case TKTX_PVR_2BPP_SRGB_BLOCK: return ImageFormat_PVR_2BPP_SRGB_BLOCK;
+		case TKTX_PVR_2BPPA_SRGB_BLOCK: return ImageFormat_PVR_2BPPA_SRGB_BLOCK;
+		case TKTX_PVR_4BPP_SRGB_BLOCK: return ImageFormat_PVR_4BPP_SRGB_BLOCK;
+		case TKTX_PVR_4BPPA_SRGB_BLOCK: return ImageFormat_PVR_4BPPA_SRGB_BLOCK;
+		/*
+		case TKTX_ETC2_R8G8B8_UNORM_BLOCK: return ImageFormat_ETC2_R8G8B8_UNORM_BLOCK;
+		case TKTX_ETC2_R8G8B8A1_UNORM_BLOCK: return ImageFormat_ETC2_R8G8B8A1_UNORM_BLOCK;
+		case TKTX_ETC2_R8G8B8A8_UNORM_BLOCK: return ImageFormat_ETC2_R8G8B8A8_UNORM_BLOCK;
+		case TKTX_ETC2_R8G8B8_SRGB_BLOCK: return ImageFormat_ETC2_R8G8B8_SRGB_BLOCK;
+		case TKTX_ETC2_R8G8B8A1_SRGB_BLOCK: return ImageFormat_ETC2_R8G8B8A1_SRGB_BLOCK;
+		case TKTX_ETC2_R8G8B8A8_SRGB_BLOCK: return ImageFormat_ETC2_R8G8B8A8_SRGB_BLOCK;
+		case TKTX_EAC_R11_UNORM_BLOCK: return ImageFormat_EAC_R11_UNORM_BLOCK;
+		case TKTX_EAC_R11G11_UNORM_BLOCK: return ImageFormat_EAC_R11G11_UNORM_BLOCK;
+		case TKTX_EAC_R11_SNORM_BLOCK: return ImageFormat_EAC_R11_SNORM_BLOCK;
+		case TKTX_EAC_R11G11_SNORM_BLOCK: return ImageFormat_EAC_R11G11_SNORM_BLOCK;
+		case TKTX_ASTC_4x4_UNORM_BLOCK: return ImageFormat_ASTC_4x4_UNORM_BLOCK;
+		case TKTX_ASTC_4x4_SRGB_BLOCK: return ImageFormat_ASTC_4x4_SRGB_BLOCK;
+		case TKTX_ASTC_5x4_UNORM_BLOCK: return ImageFormat_ASTC_5x4_UNORM_BLOCK;
+		case TKTX_ASTC_5x4_SRGB_BLOCK: return ImageFormat_ASTC_5x4_SRGB_BLOCK;
+		case TKTX_ASTC_5x5_UNORM_BLOCK: return ImageFormat_ASTC_5x5_UNORM_BLOCK;
+		case TKTX_ASTC_5x5_SRGB_BLOCK: return ImageFormat_ASTC_5x5_SRGB_BLOCK;
+		case TKTX_ASTC_6x5_UNORM_BLOCK: return ImageFormat_ASTC_6x5_UNORM_BLOCK;
+		case TKTX_ASTC_6x5_SRGB_BLOCK: return ImageFormat_ASTC_6x5_SRGB_BLOCK;
+		case TKTX_ASTC_6x6_UNORM_BLOCK: return ImageFormat_ASTC_6x6_UNORM_BLOCK;
+		case TKTX_ASTC_6x6_SRGB_BLOCK: return ImageFormat_ASTC_6x6_SRGB_BLOCK;
+		case TKTX_ASTC_8x5_UNORM_BLOCK: return ImageFormat_ASTC_8x5_UNORM_BLOCK;
+		case TKTX_ASTC_8x5_SRGB_BLOCK: return ImageFormat_ASTC_8x5_SRGB_BLOCK;
+		case TKTX_ASTC_8x6_UNORM_BLOCK: return ImageFormat_ASTC_8x6_UNORM_BLOCK;
+		case TKTX_ASTC_8x6_SRGB_BLOCK: return ImageFormat_ASTC_8x6_SRGB_BLOCK;
+		case TKTX_ASTC_8x8_UNORM_BLOCK: return ImageFormat_ASTC_8x8_UNORM_BLOCK;
+		case TKTX_ASTC_8x8_SRGB_BLOCK: return ImageFormat_ASTC_8x8_SRGB_BLOCK;
+		case TKTX_ASTC_10x5_UNORM_BLOCK: return ImageFormat_ASTC_10x5_UNORM_BLOCK;
+		case TKTX_ASTC_10x5_SRGB_BLOCK: return ImageFormat_ASTC_10x5_SRGB_BLOCK;
+		case TKTX_ASTC_10x6_UNORM_BLOCK: return ImageFormat_ASTC_10x6_UNORM_BLOCK;
+		case TKTX_ASTC_10x6_SRGB_BLOCK: return ImageFormat_ASTC_10x6_SRGB_BLOCK;
+		case TKTX_ASTC_10x8_UNORM_BLOCK: return ImageFormat_ASTC_10x8_UNORM_BLOCK;
+		case TKTX_ASTC_10x8_SRGB_BLOCK: return ImageFormat_ASTC_10x8_SRGB_BLOCK;
+		case TKTX_ASTC_10x10_UNORM_BLOCK: return ImageFormat_ASTC_10x10_UNORM_BLOCK;
+		case TKTX_ASTC_10x10_SRGB_BLOCK: return ImageFormat_ASTC_10x10_SRGB_BLOCK;
+		case TKTX_ASTC_12x10_UNORM_BLOCK: return ImageFormat_ASTC_12x10_UNORM_BLOCK;
+		case TKTX_ASTC_12x10_SRGB_BLOCK: return ImageFormat_ASTC_12x10_SRGB_BLOCK;
+		case TKTX_ASTC_12x12_UNORM_BLOCK: return ImageFormat_ASTC_12x12_UNORM_BLOCK;
+		case TKTX_ASTC_12x12_SRGB_BLOCK: return ImageFormat_ASTC_12x12_SRGB_BLOCK;
+		 */
+	default: return ImageFormat_UNDEFINED;
+	}
+}
+
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
+	TinyKtx_Callbacks callbacks = {
+			.error  = &tinyktxCallbackError,
+			.alloc = &tinyktxCallbackAlloc,
+			.free = &tinyktxCallbackFree,
+			.read = &tinyktxCallbackRead,
+			.seek = &tinyktxCallbackSeek,
+			.tell = &tinyktxCallbackTell
+	};
+
+	auto ctx =  TinyKtx_CreateContext( &callbacks, handle);
+	TinyKtx_BeginRead(ctx);
+	TinyKtx_ReadHeader(ctx);
+	uint32_t w = TinyKtx_Width(ctx);
+	uint32_t h = TinyKtx_Height(ctx);
+	uint32_t d = TinyKtx_Depth(ctx);
+	uint32_t s = TinyKtx_ArraySlices(ctx);
+	ImageFormat fmt = ImageFormatToTinyKtxFormat(TinyKtx_GetFormat(ctx));
+	if(fmt == ImageFormat_UNDEFINED) {
+		TinyKtx_DestroyContext(ctx);
+		return nullptr;
+	}
+
+	Image_ImageHeader const* topImage = nullptr;
+	Image_ImageHeader const* prevImage = nullptr;
+	for(auto i = 0u; i < TinyKtx_NumberOfMipmaps(ctx);++i) {
+		auto image = Image_CreateNoClear(w, h, d, s, fmt);
+		prevImage = topImage;
+		if(i == 0) topImage = image;
+
+		if(Image_ByteCountOf(image) != TinyKtx_ImageSize(ctx, i)) {
+			LOGERRORF("KTX file %s mipmap %i size error", VFile_GetName(handle), i);
+			Image_Destroy(topImage);
+			TinyKtx_DestroyContext(ctx);
+			return nullptr;
+		}
+		memcpy(Image_RawDataPtr(image), TinyKtx_ImageRawData(ctx, i), Image_ByteCountOf(image));
+		if(prevImage) {
+			auto p = (Image_ImageHeader *)prevImage;
+			p->nextType = Image_NextType::Image_IT_MipMaps;
+			p->nextImage = image;
+		}
+	}
+	return topImage;
+}
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
   VFile::File *file = VFile::File::FromHandle(handle);
@@ -624,6 +849,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
       case "pic"_hash:
       case "pnm"_hash:
         return Image_LoadLDR(handle);
+    case "ktx"_hash:
+    	return Image_LoadKTX(handle);
       default:
         return nullptr;
     }
