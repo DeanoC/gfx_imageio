@@ -597,14 +597,15 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 
   return image;
 }
+static void tinyktxCallbackError(void *user, char const *msg) {
+	LOGERRORF("Tiny_Ktx ERROR: %s", msg);
+}
 static void *tinyktxCallbackAlloc(void *user, size_t size) {
 	return MEMORY_MALLOC(size);
 }
-
 static void tinyktxCallbackFree(void *user, void *data) {
 	MEMORY_FREE(data);
 }
-
 static size_t tinyktxCallbackRead(void *user, void* data, size_t size) {
 	auto handle = (VFile_Handle) user;
 	return VFile_Read(handle, data, size);
@@ -617,12 +618,9 @@ static bool tinyktxCallbackSeek(void *user, int64_t offset) {
 static int64_t tinyktxCallbackTell(void *user) {
 	auto handle = (VFile_Handle) user;
 	return VFile_Tell(handle);
-
 }
 
-static void tinyktxCallbackError(void *user, char const *msg) {
-	LOGERRORF("Tiny_Ktx ERROR: %s", msg);
-}
+
 
 static ImageFormat ImageFormatToTinyKtxFormat(TinyKtx_Format format) {
 	switch(format) {
