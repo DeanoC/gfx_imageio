@@ -803,7 +803,6 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	Image_ImageHeader const* prevImage = nullptr;
 	for(auto i = 0u; i < TinyKtx_NumberOfMipmaps(ctx);++i) {
 		auto image = Image_CreateNoClear(w, h, d, s, fmt);
-		prevImage = topImage;
 		if(i == 0) topImage = image;
 
 		if(Image_ByteCountOf(image) != TinyKtx_ImageSize(ctx, i)) {
@@ -818,6 +817,10 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 			p->nextType = Image_NextType::Image_IT_MipMaps;
 			p->nextImage = image;
 		}
+		if(w > 1) w = w / 2;
+		if(h > 1) h = h / 2;
+		if(d > 1) d = d / 2;
+		prevImage = image;
 	}
 	return topImage;
 }
