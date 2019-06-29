@@ -787,7 +787,6 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	};
 
 	auto ctx =  TinyKtx_CreateContext( &callbacks, handle);
-	TinyKtx_BeginRead(ctx);
 	TinyKtx_ReadHeader(ctx);
 	uint32_t w = TinyKtx_Width(ctx);
 	uint32_t h = TinyKtx_Height(ctx);
@@ -822,6 +821,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 		if(d > 1) d = d / 2;
 		prevImage = image;
 	}
+
+	TinyKtx_DestroyContext(ctx);
 	return topImage;
 }
 
