@@ -13,7 +13,6 @@
 // TODO EXR
 //#include "syoyo/tiny_exr.hpp"
 
-// currentlybelieved to be broken!
 AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 
@@ -37,7 +36,8 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 	header.mPixelFormat.mDWSize = 32;
 
 	header.mDWFlags =
-			DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT // | TODO Deano (mMipMapCount > 1 ? DDSD_MIPMAPCOUNT : 0)
+			DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT  |
+					(Image_LinkedImageCountOf(image) > 1 ? DDSD_MIPMAPCOUNT : 0)
 					| (image->depth > 1 ? DDSD_DEPTH : 0);
 
 	int nChannels = ImageFormat_ChannelCount(image->format);
@@ -182,27 +182,13 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 		file->Write(&headerDX10, sizeof(headerDX10) * 1);
 	}
 
-	size_t size = Image_BytesRequiredForMipMapsOf(image);
-
-	// RGB to BGR
-	//  if (mFormat == RGB8 || mFormat == RGBA8) {
-	//    swapPixelChannels(pData, size / nChannels, nChannels, 0, 2);
-	//  }
-
 	for (uint32_t mipMapLevel = 0; mipMapLevel < header.mDWMipMapCount; mipMapLevel++) {
-		Image_ImageHeader const *face = Image_LinkedImageOf(image, mipMapLevel);
+		Image_ImageHeader const *mipmap = Image_LinkedImageOf(image, mipMapLevel);
 
-		size_t faceSize = Image_ByteCountOf(face);
-		void *src = Image_RawDataPtr(face);
+		size_t faceSize = Image_ByteCountOf(mipmap);
+		void *src = Image_RawDataPtr(mipmap);
 		file->Write(src, faceSize);
 	}
-
-	file->Close();
-
-	// Restore to RGB
-	//  if (mFormat == RGB8 || mFormat == RGBA8) {
-	//    swapPixelChannels(pData, size / nChannels, nChannels, 0, 2);
-	//  }
 
 	return true;
 }
