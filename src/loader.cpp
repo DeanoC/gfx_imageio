@@ -624,7 +624,7 @@ static int64_t tinyktxCallbackTell(void *user) {
 
 
 
-static ImageFormat ImageFormatToTinyKtxFormat(TinyKtx_Format format) {
+static ImageFormat ImageFormatFromTinyKtxFormat(TinyKtx_Format format) {
 	switch(format) {
 		case TKTX_UNDEFINED: return ImageFormat_UNDEFINED;
 		case TKTX_R4G4_UNORM_PACK8: return ImageFormat_R4G4_UNORM_PACK8;
@@ -792,7 +792,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	uint32_t h = TinyKtx_Height(ctx);
 	uint32_t d = TinyKtx_Depth(ctx);
 	uint32_t s = TinyKtx_ArraySlices(ctx);
-	ImageFormat fmt = ImageFormatToTinyKtxFormat(TinyKtx_GetFormat(ctx));
+	ImageFormat fmt = ImageFormatFromTinyKtxFormat(TinyKtx_GetFormat(ctx));
 	if(fmt == ImageFormat_UNDEFINED) {
 		TinyKtx_DestroyContext(ctx);
 		return nullptr;
