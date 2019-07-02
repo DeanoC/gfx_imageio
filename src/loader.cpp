@@ -12,6 +12,8 @@
 #include <float.h>
 #include "tiny_ktx/tinyktx.h"
 
+// parts of the DDS and PVR loader borrowed from https://github.com/ConfettiFX/The-Forge
+
 // Describes the header of a PVR header-texture
 typedef struct PVR_Header_Texture_TAG {
   uint32_t mVersion;
