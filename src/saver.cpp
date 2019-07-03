@@ -12,6 +12,180 @@
 
 // TODO EXR
 //#include "syoyo/tiny_exr.hpp"
+namespace Image {
+static DDS_DXGI_FORMAT ImageFormatToDDSDXGIFormat(ImageFormat fmt) {
+	switch (fmt) {
+	case ImageFormat_R5G6B5_UNORM_PACK16: 	return DDS_DXGI_FORMAT_B5G6R5_UNORM;
+	case ImageFormat_B5G6R5_UNORM_PACK16: 	return DDS_DXGI_FORMAT_B5G6R5_UNORM;
+	case ImageFormat_B5G5R5A1_UNORM_PACK16: return DDS_DXGI_FORMAT_B5G5R5A1_UNORM;
+
+	case ImageFormat_R8_UNORM: 				return DDS_DXGI_FORMAT_R8_UNORM;
+	case ImageFormat_R8_SNORM: 				return DDS_DXGI_FORMAT_R8_SNORM;
+	case ImageFormat_R8_UINT: 				return DDS_DXGI_FORMAT_R8_UINT;
+	case ImageFormat_R8_SINT: 				return DDS_DXGI_FORMAT_R8_SINT;
+
+	case ImageFormat_R8G8_UNORM: 			return DDS_DXGI_FORMAT_R8G8_UNORM;
+	case ImageFormat_R8G8_SNORM: 			return DDS_DXGI_FORMAT_R8G8_SNORM;
+	case ImageFormat_R8G8_UINT: 			return DDS_DXGI_FORMAT_R8G8_UINT;
+	case ImageFormat_R8G8_SINT: 			return DDS_DXGI_FORMAT_R8G8_SINT;
+
+	case ImageFormat_R8G8B8A8_UNORM: 	return DDS_DXGI_FORMAT_R8G8B8A8_UNORM;
+	case ImageFormat_R8G8B8A8_SNORM: 	return DDS_DXGI_FORMAT_R8G8B8A8_SNORM;
+	case ImageFormat_R8G8B8A8_UINT: 	return DDS_DXGI_FORMAT_R8G8B8A8_UINT;
+	case ImageFormat_R8G8B8A8_SINT: 	return DDS_DXGI_FORMAT_R8G8B8A8_SINT;
+	case ImageFormat_R8G8B8A8_SRGB: 	return DDS_DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+
+	case ImageFormat_B8G8R8A8_UNORM: 	return DDS_DXGI_FORMAT_B8G8R8A8_UNORM;
+	case ImageFormat_B8G8R8A8_SRGB:		return DDS_DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+
+	case ImageFormat_R16_UNORM:				return DDS_DXGI_FORMAT_R16_UNORM;
+	case ImageFormat_R16_SNORM:				return DDS_DXGI_FORMAT_R16_SNORM;
+	case ImageFormat_R16_UINT:				return DDS_DXGI_FORMAT_R16_UINT;
+	case ImageFormat_R16_SINT:				return DDS_DXGI_FORMAT_R16_SINT;
+	case ImageFormat_R16_SFLOAT:			return DDS_DXGI_FORMAT_R16_FLOAT;
+
+	case ImageFormat_R16G16_UNORM:		return DDS_DXGI_FORMAT_R16G16_UNORM;
+	case ImageFormat_R16G16_SNORM:		return DDS_DXGI_FORMAT_R16G16_SNORM;
+	case ImageFormat_R16G16_UINT:			return DDS_DXGI_FORMAT_R16G16_UINT;
+	case ImageFormat_R16G16_SINT:			return DDS_DXGI_FORMAT_R16G16_SINT;
+	case ImageFormat_R16G16_SFLOAT:		return DDS_DXGI_FORMAT_R16G16_FLOAT;
+
+	case ImageFormat_R16G16B16A16_UNORM:	return DDS_DXGI_FORMAT_R16G16B16A16_UNORM;
+	case ImageFormat_R16G16B16A16_SNORM:	return DDS_DXGI_FORMAT_R16G16B16A16_SNORM;
+	case ImageFormat_R16G16B16A16_UINT:		return DDS_DXGI_FORMAT_R16G16B16A16_UINT;
+	case ImageFormat_R16G16B16A16_SINT:		return DDS_DXGI_FORMAT_R16G16B16A16_SINT;
+	case ImageFormat_R16G16B16A16_SFLOAT:	return DDS_DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+	case ImageFormat_R32_UINT:				return DDS_DXGI_FORMAT_R32_UINT;
+	case ImageFormat_R32_SINT:				return DDS_DXGI_FORMAT_R32_SINT;
+	case ImageFormat_R32_SFLOAT:			return DDS_DXGI_FORMAT_R32_FLOAT;
+
+	case ImageFormat_R32G32_UINT:			return DDS_DXGI_FORMAT_R32G32_UINT;
+	case ImageFormat_R32G32_SINT:			return DDS_DXGI_FORMAT_R32G32_SINT;
+	case ImageFormat_R32G32_SFLOAT:		return DDS_DXGI_FORMAT_R32G32_FLOAT;
+
+	case ImageFormat_R32G32B32_UINT:	return DDS_DXGI_FORMAT_R32G32B32_UINT;
+	case ImageFormat_R32G32B32_SINT:	return DDS_DXGI_FORMAT_R32G32B32_SINT;
+	case ImageFormat_R32G32B32_SFLOAT:return DDS_DXGI_FORMAT_R32G32B32_FLOAT;
+
+	case ImageFormat_R32G32B32A32_UINT:		return DDS_DXGI_FORMAT_R32G32B32A32_UINT;
+	case ImageFormat_R32G32B32A32_SINT:		return DDS_DXGI_FORMAT_R32G32B32A32_SINT;
+	case ImageFormat_R32G32B32A32_SFLOAT:	return DDS_DXGI_FORMAT_R32G32B32A32_FLOAT;
+
+	case ImageFormat_E5B9G9R9_UFLOAT_PACK32: return DDS_DXGI_FORMAT_R9G9B9E5_SHAREDEXP; // ??
+
+	case ImageFormat_D16_UNORM:				return DDS_DXGI_FORMAT_R16_UNORM;
+	case ImageFormat_X8_D24_UNORM_PACK32:	return DDS_DXGI_FORMAT_R24_UNORM_X8_TYPELESS; // ??
+	case ImageFormat_D32_SFLOAT:			return DDS_DXGI_FORMAT_R32_FLOAT;
+	case ImageFormat_S8_UINT:					return DDS_DXGI_FORMAT_R8_UINT;
+	case ImageFormat_D32_SFLOAT_S8_UINT: return DDS_DXGI_FORMAT_D32_FLOAT_S8X24_UINT; // ??
+	case ImageFormat_BC1_RGB_UNORM_BLOCK: 	return DDS_DXGI_FORMAT_BC1_UNORM;
+	case ImageFormat_BC1_RGB_SRGB_BLOCK:		return DDS_DXGI_FORMAT_BC1_UNORM_SRGB;
+	case ImageFormat_BC1_RGBA_UNORM_BLOCK:	return DDS_DXGI_FORMAT_BC1_UNORM;
+	case ImageFormat_BC1_RGBA_SRGB_BLOCK:		return DDS_DXGI_FORMAT_BC1_UNORM_SRGB;
+	case ImageFormat_BC2_UNORM_BLOCK:				return DDS_DXGI_FORMAT_BC2_UNORM;
+	case ImageFormat_BC2_SRGB_BLOCK:				return DDS_DXGI_FORMAT_BC2_UNORM_SRGB;
+	case ImageFormat_BC3_UNORM_BLOCK:				return DDS_DXGI_FORMAT_BC3_UNORM;
+	case ImageFormat_BC3_SRGB_BLOCK:				return DDS_DXGI_FORMAT_BC3_UNORM_SRGB;
+	case ImageFormat_BC4_UNORM_BLOCK:				return DDS_DXGI_FORMAT_BC4_UNORM;
+	case ImageFormat_BC4_SNORM_BLOCK:				return DDS_DXGI_FORMAT_BC4_SNORM;
+	case ImageFormat_BC5_UNORM_BLOCK:				return DDS_DXGI_FORMAT_BC5_UNORM;
+	case ImageFormat_BC5_SNORM_BLOCK:				return DDS_DXGI_FORMAT_BC5_SNORM;
+	case ImageFormat_BC6H_UFLOAT_BLOCK:			return DDS_DXGI_FORMAT_BC6H_UF16;
+	case ImageFormat_BC6H_SFLOAT_BLOCK:			return DDS_DXGI_FORMAT_BC6H_SF16;
+	case ImageFormat_BC7_UNORM_BLOCK:				return DDS_DXGI_FORMAT_BC7_UNORM;
+	case ImageFormat_BC7_SRGB_BLOCK:				return DDS_DXGI_FORMAT_BC7_UNORM_SRGB;
+
+	// unsupported
+	// TODO Some of these could be supported by the older non DX10 format..
+	case ImageFormat_PVR_2BPP_BLOCK:
+	case ImageFormat_PVR_2BPPA_BLOCK:
+	case ImageFormat_PVR_4BPP_BLOCK:
+	case ImageFormat_PVR_4BPPA_BLOCK:
+	case ImageFormat_PVR_2BPP_SRGB_BLOCK:
+	case ImageFormat_PVR_2BPPA_SRGB_BLOCK:
+	case ImageFormat_PVR_4BPP_SRGB_BLOCK:
+	case ImageFormat_PVR_4BPPA_SRGB_BLOCK:
+
+	case ImageFormat_R4G4_UNORM_PACK8:
+	case ImageFormat_R8_USCALED:
+	case ImageFormat_R8_SSCALED:
+	case ImageFormat_R8_SRGB:
+	case ImageFormat_R4G4B4A4_UNORM_PACK16:
+	case ImageFormat_B4G4R4A4_UNORM_PACK16:
+	case ImageFormat_R5G5B5A1_UNORM_PACK16:
+	case ImageFormat_A1R5G5B5_UNORM_PACK16:
+	case ImageFormat_R8G8_USCALED:
+	case ImageFormat_R8G8_SSCALED:
+	case ImageFormat_R8G8_SRGB:
+	case ImageFormat_R8G8B8_USCALED:
+	case ImageFormat_R8G8B8_SSCALED:
+	case ImageFormat_R8G8B8_SRGB:
+	case ImageFormat_B8G8R8_USCALED:
+	case ImageFormat_B8G8R8_SSCALED:
+	case ImageFormat_B8G8R8_SRGB:
+	case ImageFormat_R8G8B8_UNORM: 		//return DDS_DXGI_FORMAT_R8G8B8_UNORM;
+	case ImageFormat_R8G8B8_SNORM: 		//return DDS_DXGI_FORMAT_R8G8B8_SNORM;
+	case ImageFormat_R8G8B8_UINT: 		//return DDS_DXGI_FORMAT_R8G8B8_UINT;
+	case ImageFormat_R8G8B8_SINT: 		//return DDS_DXGI_FORMAT_R8G8B8_SINT;
+	case ImageFormat_R8G8B8A8_USCALED:
+	case ImageFormat_R8G8B8A8_SSCALED:
+	case ImageFormat_B8G8R8A8_USCALED:
+	case ImageFormat_B8G8R8A8_SSCALED:
+	case ImageFormat_A8B8G8R8_USCALED_PACK32:
+	case ImageFormat_A8B8G8R8_SSCALED_PACK32:
+	case ImageFormat_R16_USCALED:
+	case ImageFormat_R16_SSCALED:
+	case ImageFormat_R16G16_USCALED:
+	case ImageFormat_R16G16_SSCALED:
+	case ImageFormat_R16G16B16_USCALED:
+	case ImageFormat_R16G16B16_SSCALED:
+	case ImageFormat_R16G16B16A16_USCALED:
+	case ImageFormat_R16G16B16A16_SSCALED:
+	case ImageFormat_B8G8R8_UNORM:
+	case ImageFormat_B8G8R8_SNORM:
+	case ImageFormat_B8G8R8_UINT:
+	case ImageFormat_B8G8R8_SINT:
+	case ImageFormat_B8G8R8A8_SNORM:
+	case ImageFormat_B8G8R8A8_UINT:
+	case ImageFormat_B8G8R8A8_SINT:
+	case ImageFormat_A8B8G8R8_UNORM_PACK32:
+	case ImageFormat_A8B8G8R8_SNORM_PACK32:
+	case ImageFormat_A8B8G8R8_UINT_PACK32:
+	case ImageFormat_A8B8G8R8_SINT_PACK32:
+	case ImageFormat_A8B8G8R8_SRGB_PACK32:
+	case ImageFormat_A2R10G10B10_UNORM_PACK32:
+	case ImageFormat_A2R10G10B10_USCALED_PACK32:
+	case ImageFormat_A2R10G10B10_UINT_PACK32:
+	case ImageFormat_A2B10G10R10_UNORM_PACK32:
+	case ImageFormat_A2B10G10R10_USCALED_PACK32:
+	case ImageFormat_A2B10G10R10_UINT_PACK32:
+	case ImageFormat_R16G16B16_UNORM:	//return DDS_DXGI_FORMAT_R16G16B16_UNORM;
+	case ImageFormat_R16G16B16_SNORM:	//return DDS_DXGI_FORMAT_R16G16B16_SNORM;
+	case ImageFormat_R16G16B16_UINT:	//return DDS_DXGI_FORMAT_R16G16B16_UINT;
+	case ImageFormat_R16G16B16_SINT:	//return DDS_DXGI_FORMAT_R16G16B16_SINT;
+	case ImageFormat_R16G16B16_SFLOAT://return DDS_DXGI_FORMAT_R16G16B16_FLOAT;
+	case ImageFormat_R64_UINT:
+	case ImageFormat_R64_SINT:
+	case ImageFormat_R64_SFLOAT:
+	case ImageFormat_R64G64_UINT:
+	case ImageFormat_R64G64_SINT:
+	case ImageFormat_R64G64_SFLOAT:
+	case ImageFormat_R64G64B64_UINT:
+	case ImageFormat_R64G64B64_SINT:
+	case ImageFormat_R64G64B64_SFLOAT:
+	case ImageFormat_R64G64B64A64_UINT:
+	case ImageFormat_R64G64B64A64_SINT:
+	case ImageFormat_R64G64B64A64_SFLOAT:
+	case ImageFormat_B10G11R11_UFLOAT_PACK32:
+	case ImageFormat_D16_UNORM_S8_UINT:
+	case ImageFormat_D24_UNORM_S8_UINT:
+
+	case ImageFormat_UNDEFINED: return DDS_DXGI_FORMAT_UNKNOWN;
+
+	}
+}
+} // end namespace Image
 
 AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
@@ -42,129 +216,39 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 
 	int nChannels = ImageFormat_ChannelCount(image->format);
 
-	if (ImageFormat_BitWidth(image->format) <= 32) {
-		if (ImageFormat_IsHomogenous(image->format)) {
-			switch (ImageFormat_ChannelBitWidth(image->format, 0)) {
-			case 4:
-				// only 4 channel 32 bit formats are 2x4 and 4x4 channels
-				if (nChannels == 2) {
-					header.mPixelFormat.mDWRGBBitCount = 8;
-					header.mPixelFormat.mDWRGBAlphaBitMask = 0xF0;
-					header.mPixelFormat.mDWRBitMask = 0x0F;
-				} else {
-					header.mPixelFormat.mDWRGBBitCount = 16;
-					header.mPixelFormat.mDWRGBAlphaBitMask = 0xF000;
-					header.mPixelFormat.mDWRBitMask = 0x0F00;
-					header.mPixelFormat.mDWGBitMask = 0x00F0;
-					header.mPixelFormat.mDWBBitMask = 0x000F;
-				}
-				break;
-			case 8:header.mPixelFormat.mDWRGBBitCount = 8 * nChannels;
-				header.mPixelFormat.mDWRGBAlphaBitMask = (nChannels == 4) ? 0xFF000000 : (nChannels == 2) ? 0xFF00 : 0;
-				header.mPixelFormat.mDWRBitMask = (nChannels > 2) ? 0x00FF0000 : 0xFF;
-				header.mPixelFormat.mDWGBitMask = (nChannels > 1) ? 0x0000FF00 : 0;
-				header.mPixelFormat.mDWBBitMask = (nChannels > 1) ? 0x000000FF : 0;
-				break;
-			case 16:
-				if (nChannels == 1) {
-					header.mPixelFormat.mDWRGBBitCount = 16;
-					header.mPixelFormat.mDWRBitMask = 0xFFFF;
-				} else {
-					header.mPixelFormat.mDWRGBBitCount = 32;
-					header.mPixelFormat.mDWRBitMask = 0xFFFF0000;
-					header.mPixelFormat.mDWRGBAlphaBitMask = 0x0000FFFF;
-				}
-				break;
-			case 32:header.mPixelFormat.mDWRGBBitCount = 32;
-				header.mPixelFormat.mDWRBitMask = 0xFFFFFFFF;
-				break;
-			}
+	header.mPixelFormat.mDWFlags = DDPF_FOURCC;
+
+	switch (image->format) {
+	case ImageFormat_BC1_RGBA_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '1');
+		break;
+	case ImageFormat_BC2_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '3');
+		break;
+	case ImageFormat_BC3_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '5');
+		break;
+	case ImageFormat_BC4_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('A', 'T', 'I', '1');
+		break;
+	case ImageFormat_BC5_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('A', 'T', 'I', '2');
+		break;
+	default:
+		header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', '1', '0');
+		headerDX10.mArraySize = 1;
+		headerDX10.mDXGIFormat = ImageFormatToDDSDXGIFormat(image->format);
+		if(headerDX10.mDXGIFormat == DDS_DXGI_FORMAT_UNKNOWN) {
+			return false;
+		}
+
+		headerDX10.mMiscFlag = Image_IsCubemap(image) ? D3D10_RESOURCE_MISC_TEXTURECUBE : 0;
+		if (Image_Is1D(image)) {
+			headerDX10.mResourceDimension = D3D10_RESOURCE_DIMENSION_TEXTURE1D;
+		} else if (Image_Is2D(image)) {
+			headerDX10.mResourceDimension = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
+		} else if (Image_Is3D(image)) {
+			headerDX10.mResourceDimension = D3D10_RESOURCE_DIMENSION_TEXTURE3D;
 		} else {
-			switch (image->format) {
-			case ImageFormat_R5G6B5_UNORM_PACK16:
-			case ImageFormat_B5G6R5_UNORM_PACK16:header.mPixelFormat.mDWRGBBitCount = 16;
-				header.mPixelFormat.mDWRGBAlphaBitMask = 0;
-				header.mPixelFormat.mDWBBitMask = 0xF800;
-				header.mPixelFormat.mDWGBitMask = 0x07E0;
-				header.mPixelFormat.mDWRBitMask = 0x001F;
-				break;
-			case ImageFormat_R5G5B5A1_UNORM_PACK16:
-			case ImageFormat_B5G5R5A1_UNORM_PACK16:
-			case ImageFormat_A1R5G5B5_UNORM_PACK16:header.mPixelFormat.mDWRGBBitCount = 16;
-				header.mPixelFormat.mDWRGBAlphaBitMask = 0x0001;
-				header.mPixelFormat.mDWRBitMask = 0xF800;
-				header.mPixelFormat.mDWGBitMask = 0x07C0;
-				header.mPixelFormat.mDWBBitMask = 0x003E;
-				break;
-
-			case ImageFormat_A2R10G10B10_UNORM_PACK32:
-			case ImageFormat_A2R10G10B10_USCALED_PACK32:
-			case ImageFormat_A2R10G10B10_UINT_PACK32:
-			case ImageFormat_A2B10G10R10_UNORM_PACK32:
-			case ImageFormat_A2B10G10R10_USCALED_PACK32:
-			case ImageFormat_A2B10G10R10_UINT_PACK32:header.mPixelFormat.mDWRGBBitCount = 32;
-				header.mPixelFormat.mDWRGBAlphaBitMask = 0xC0000000;
-				header.mPixelFormat.mDWRBitMask = 0x3FF00000;
-				header.mPixelFormat.mDWGBitMask = 0x000FFC00;
-				header.mPixelFormat.mDWBBitMask = 0x000003FF;
-				break;
-			default:return false;
-			}
+			return false;
 		}
-		header.mPixelFormat.mDWFlags = ((nChannels < 3) ? 0x00020000 : DDPF_RGB) | ((nChannels & 1) ? 0 : DDPF_ALPHAPIXELS);
-	} else {
-		header.mPixelFormat.mDWFlags = DDPF_FOURCC;
-
-		switch (image->format) {
-		case ImageFormat_R16G16_UNORM: header.mPixelFormat.mDWFourCC = 34;
-			break;
-		case ImageFormat_R16G16B16A16_UNORM: header.mPixelFormat.mDWFourCC = 36;
-			break;
-		case ImageFormat_R16_SFLOAT: header.mPixelFormat.mDWFourCC = 111;
-			break;
-		case ImageFormat_R16G16_SFLOAT: header.mPixelFormat.mDWFourCC = 112;
-			break;
-		case ImageFormat_R16G16B16A16_SFLOAT: header.mPixelFormat.mDWFourCC = 113;
-			break;
-		case ImageFormat_R32_SFLOAT: header.mPixelFormat.mDWFourCC = 114;
-			break;
-		case ImageFormat_R32G32_SFLOAT: header.mPixelFormat.mDWFourCC = 115;
-			break;
-		case ImageFormat_R32G32B32A32_SFLOAT: header.mPixelFormat.mDWFourCC = 116;
-			break;
-		case ImageFormat_BC1_RGBA_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '1');
-			break;
-		case ImageFormat_BC2_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '3');
-			break;
-		case ImageFormat_BC3_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '5');
-			break;
-		case ImageFormat_BC4_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('A', 'T', 'I', '1');
-			break;
-		case ImageFormat_BC5_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('A', 'T', 'I', '2');
-			break;
-		default:header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', '1', '0');
-			headerDX10.mArraySize = 1;
-			headerDX10.mDXGIFormat = Image_IsCubemap(image) ? D3D10_RESOURCE_MISC_TEXTURECUBE : 0;
-			if (Image_Is1D(image)) {
-				headerDX10.mResourceDimension = D3D10_RESOURCE_DIMENSION_TEXTURE1D;
-			} else if (Image_Is2D(image)) {
-				headerDX10.mResourceDimension = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
-			} else if (Image_Is3D(image)) {
-				headerDX10.mResourceDimension = D3D10_RESOURCE_DIMENSION_TEXTURE3D;
-			}
-
-			switch (image->format) {
-			case ImageFormat_R32G32B32A32_SFLOAT: headerDX10.mDXGIFormat = 6;
-				break;
-			case ImageFormat_E5B9G9R9_UFLOAT_PACK32: headerDX10.mDXGIFormat = 67;
-				break;
-			case ImageFormat_B10G11R11_UFLOAT_PACK32: headerDX10.mDXGIFormat = 26;
-				break;
-			default: return false;
-			}
-		}
+		break;
 	}
-	// header.
 
 	header.mCaps.mDWCaps1 =
 			DDSCAPS_TEXTURE | (Image_LinkedImageCountOf(image) > 1 ? DDSCAPS_MIPMAP | DDSCAPS_COMPLEX : 0) |
