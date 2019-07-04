@@ -181,7 +181,8 @@ static DDS_DXGI_FORMAT ImageFormatToDDSDXGIFormat(ImageFormat fmt) {
 	case ImageFormat_D16_UNORM_S8_UINT:
 	case ImageFormat_D24_UNORM_S8_UINT:
 
-	case ImageFormat_UNDEFINED: return DDS_DXGI_FORMAT_UNKNOWN;
+	case ImageFormat_UNDEFINED:
+	default: return DDS_DXGI_FORMAT_UNKNOWN;
 
 	}
 }
