@@ -180,6 +180,44 @@ static DDS_DXGI_FORMAT ImageFormatToDDSDXGIFormat(ImageFormat fmt) {
 	case ImageFormat_B10G11R11_UFLOAT_PACK32:
 	case ImageFormat_D16_UNORM_S8_UINT:
 	case ImageFormat_D24_UNORM_S8_UINT:
+	case ImageFormat_ETC2_R8G8B8_UNORM_BLOCK:
+	case ImageFormat_ETC2_R8G8B8A1_UNORM_BLOCK:
+	case ImageFormat_ETC2_R8G8B8A8_UNORM_BLOCK:
+	case ImageFormat_ETC2_R8G8B8_SRGB_BLOCK:
+	case ImageFormat_ETC2_R8G8B8A1_SRGB_BLOCK:
+	case ImageFormat_ETC2_R8G8B8A8_SRGB_BLOCK:
+	case ImageFormat_EAC_R11_UNORM_BLOCK:
+	case ImageFormat_EAC_R11G11_UNORM_BLOCK:
+	case ImageFormat_EAC_R11_SNORM_BLOCK:
+	case ImageFormat_EAC_R11G11_SNORM_BLOCK:
+	case ImageFormat_ASTC_4x4_UNORM_BLOCK:
+	case ImageFormat_ASTC_4x4_SRGB_BLOCK:
+	case ImageFormat_ASTC_5x4_UNORM_BLOCK:
+	case ImageFormat_ASTC_5x4_SRGB_BLOCK:
+	case ImageFormat_ASTC_5x5_UNORM_BLOCK:
+	case ImageFormat_ASTC_5x5_SRGB_BLOCK:
+	case ImageFormat_ASTC_6x5_UNORM_BLOCK:
+	case ImageFormat_ASTC_6x5_SRGB_BLOCK:
+	case ImageFormat_ASTC_6x6_UNORM_BLOCK:
+	case ImageFormat_ASTC_6x6_SRGB_BLOCK:
+	case ImageFormat_ASTC_8x5_UNORM_BLOCK:
+	case ImageFormat_ASTC_8x5_SRGB_BLOCK:
+	case ImageFormat_ASTC_8x6_UNORM_BLOCK:
+	case ImageFormat_ASTC_8x6_SRGB_BLOCK:
+	case ImageFormat_ASTC_8x8_UNORM_BLOCK:
+	case ImageFormat_ASTC_8x8_SRGB_BLOCK:
+	case ImageFormat_ASTC_10x5_UNORM_BLOCK:
+	case ImageFormat_ASTC_10x5_SRGB_BLOCK:
+	case ImageFormat_ASTC_10x6_UNORM_BLOCK:
+	case ImageFormat_ASTC_10x6_SRGB_BLOCK:
+	case ImageFormat_ASTC_10x8_UNORM_BLOCK:
+	case ImageFormat_ASTC_10x8_SRGB_BLOCK:
+	case ImageFormat_ASTC_10x10_UNORM_BLOCK:
+	case ImageFormat_ASTC_10x10_SRGB_BLOCK:
+	case ImageFormat_ASTC_12x10_UNORM_BLOCK:
+	case ImageFormat_ASTC_12x10_SRGB_BLOCK:
+	case ImageFormat_ASTC_12x12_UNORM_BLOCK:
+	case ImageFormat_ASTC_12x12_SRGB_BLOCK:
 
 	case ImageFormat_UNDEFINED:
 	default: return DDS_DXGI_FORMAT_UNKNOWN;

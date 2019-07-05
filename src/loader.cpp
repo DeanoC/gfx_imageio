@@ -11,6 +11,7 @@
 #include "dds.hpp"
 #include <float.h>
 #include "tiny_ktx/tinyktx.h"
+#include "gfx_image/create.h"
 
 namespace {
 // parts of the DDS and PVR loader borrowed from https://github.com/ConfettiFX/The-Forge
@@ -671,7 +672,7 @@ static ImageFormat ImageFormatFromTinyKtxFormat(TinyKtx_Format format) {
 		case TKTX_PVR_2BPPA_SRGB_BLOCK: return ImageFormat_PVR_2BPPA_SRGB_BLOCK;
 		case TKTX_PVR_4BPP_SRGB_BLOCK: return ImageFormat_PVR_4BPP_SRGB_BLOCK;
 		case TKTX_PVR_4BPPA_SRGB_BLOCK: return ImageFormat_PVR_4BPPA_SRGB_BLOCK;
-		/*
+
 		case TKTX_ETC2_R8G8B8_UNORM_BLOCK: return ImageFormat_ETC2_R8G8B8_UNORM_BLOCK;
 		case TKTX_ETC2_R8G8B8A1_UNORM_BLOCK: return ImageFormat_ETC2_R8G8B8A1_UNORM_BLOCK;
 		case TKTX_ETC2_R8G8B8A8_UNORM_BLOCK: return ImageFormat_ETC2_R8G8B8A8_UNORM_BLOCK;
@@ -710,7 +711,7 @@ static ImageFormat ImageFormatFromTinyKtxFormat(TinyKtx_Format format) {
 		case TKTX_ASTC_12x10_SRGB_BLOCK: return ImageFormat_ASTC_12x10_SRGB_BLOCK;
 		case TKTX_ASTC_12x12_UNORM_BLOCK: return ImageFormat_ASTC_12x12_UNORM_BLOCK;
 		case TKTX_ASTC_12x12_SRGB_BLOCK: return ImageFormat_ASTC_12x12_SRGB_BLOCK;
-		 */
+
 	default: return ImageFormat_UNDEFINED;
 	}
 }
@@ -740,11 +741,22 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	Image_ImageHeader const* topImage = nullptr;
 	Image_ImageHeader const* prevImage = nullptr;
 	for(auto i = 0u; i < TinyKtx_NumberOfMipmaps(ctx);++i) {
-		auto image = Image_CreateNoClear(w, h, d, s, fmt);
+		Image_ImageHeader const *image = nullptr;
+		if(TinyKtx_IsCubemap(ctx)) {
+			image = Image_CreateCubemap(w,h, fmt);
+		} else {
+			image = Image_CreateNoClear(w, h, d, s, fmt);
+		}
+
+		if(!image) break;
 		if(i == 0) topImage = image;
 
-		if(Image_ByteCountOf(image) != TinyKtx_ImageSize(ctx, i)) {
-			LOGERRORF("KTX file %s mipmap %i size error", VFile_GetName(handle), i);
+		// ktx files seem to never have less than 16 bytes even if the image is less
+		// hence > not !=
+		size_t const expectedSize = Image_ByteCountOf(image);
+		size_t const fileSize = TinyKtx_ImageSize(ctx, i);
+		if( expectedSize > fileSize) {
+			LOGERRORF("KTX file %s mipmap %i size error %liu > %liu", VFile_GetName(handle), i, expectedSize, fileSize);
 			Image_Destroy(topImage);
 			TinyKtx_DestroyContext(ctx);
 			return nullptr;
@@ -792,6 +804,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
       case "pic"_hash:
       case "pnm"_hash:
         return Image_LoadLDR(handle);
+		case "ktx2"_hash:
     case "ktx"_hash:
     	return Image_LoadKTX(handle);
       default:
