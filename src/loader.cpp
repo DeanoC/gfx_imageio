@@ -751,17 +751,35 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 		if(!image) break;
 		if(i == 0) topImage = image;
 
-		// ktx files seem to never have less than 16 bytes even if the image is less
-		// hence > not !=
-		size_t const expectedSize = Image_ByteCountOf(image);
-		size_t const fileSize = TinyKtx_ImageSize(ctx, i);
-		if( expectedSize > fileSize) {
-			LOGERRORF("KTX file %s mipmap %i size error %liu > %liu", VFile_GetName(handle), i, expectedSize, fileSize);
-			Image_Destroy(topImage);
-			TinyKtx_DestroyContext(ctx);
-			return nullptr;
+		if(TinyKtx_IsMipMapLevelUnpacked(ctx, i)) {
+			uint32_t const srcStride = TinyKtx_UnpackedRowStride(ctx, i);
+			uint32_t const dstStride = Image_ByteCountPerRowOf(image);
+
+			auto src = (uint8_t const*) TinyKtx_ImageRawData(ctx, i);
+			auto dst = (uint8_t*)Image_RawDataPtr(image);
+
+			for (uint32_t ww = 0u; ww < image->slices; ++ww) {
+				for (uint32_t zz = 0; zz < image->depth; ++zz) {
+					for (uint32_t yy = 0; yy < image->height; ++yy) {
+						memcpy(dst, src, dstStride);
+						src += srcStride;
+						dst += dstStride;
+					}
+				}
+			}
+
+		} else {
+			// fast path data is packed we can just copy
+			size_t const expectedSize = Image_ByteCountOf(image);
+			size_t const fileSize = TinyKtx_ImageSize(ctx, i);
+			if (expectedSize > fileSize) {
+				LOGERRORF("KTX file %s mipmap %i size error %liu > %liu", VFile_GetName(handle), i, expectedSize, fileSize);
+				Image_Destroy(topImage);
+				TinyKtx_DestroyContext(ctx);
+				return nullptr;
+			}
+			memcpy(Image_RawDataPtr(image), TinyKtx_ImageRawData(ctx, i), Image_ByteCountOf(image));
 		}
-		memcpy(Image_RawDataPtr(image), TinyKtx_ImageRawData(ctx, i), Image_ByteCountOf(image));
 		if(prevImage) {
 			auto p = (Image_ImageHeader *)prevImage;
 			p->nextType = Image_NextType::Image_IT_MipMaps;
