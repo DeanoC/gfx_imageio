@@ -255,27 +255,24 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 
 	int nChannels = ImageFormat_ChannelCount(image->format);
 
+	headerDX10.mDXGIFormat = DDS_DXGI_FORMAT_UNKNOWN;;
 	header.mPixelFormat.mDWFlags = DDPF_FOURCC;
 
-	switch (image->format) {
-	case ImageFormat_BC1_RGBA_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '1');
-		break;
-	case ImageFormat_BC2_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '3');
-		break;
-	case ImageFormat_BC3_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', 'T', '5');
-		break;
-	case ImageFormat_BC4_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('A', 'T', 'I', '1');
-		break;
-	case ImageFormat_BC5_UNORM_BLOCK: header.mPixelFormat.mDWFourCC = MAKE_CHAR4('A', 'T', 'I', '2');
-		break;
-	default:
-		header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', '1', '0');
-		headerDX10.mArraySize = 1;
-		headerDX10.mDXGIFormat = ImageFormatToDDSDXGIFormat(image->format);
-		if(headerDX10.mDXGIFormat == DDS_DXGI_FORMAT_UNKNOWN) {
+	headerDX10.mDXGIFormat = ImageFormatToDDSDXGIFormat(image->format);
+	if(headerDX10.mDXGIFormat == DDS_DXGI_FORMAT_UNKNOWN) {
+		// TODO more fallbacks
+		if (image->format == ImageFormat_R8G8B8_UNORM) {
+			header.mPixelFormat.mDWRGBBitCount = 24;
+			header.mPixelFormat.mDWRBitMask = 0x000000FF;
+			header.mPixelFormat.mDWGBitMask = 0x0000FF00;
+			header.mPixelFormat.mDWBBitMask = 0x00FF0000;
+			header.mPixelFormat.mDWFlags = DDPF_RGB;
+		} else {
 			return false;
 		}
-
+	} else {
+		header.mPixelFormat.mDWFourCC = MAKE_CHAR4('D', 'X', '1', '0');
+		headerDX10.mArraySize = 1;
 		headerDX10.mMiscFlag = Image_IsCubemap(image) ? D3D10_RESOURCE_MISC_TEXTURECUBE : 0;
 		if (Image_Is1D(image)) {
 			headerDX10.mResourceDimension = D3D10_RESOURCE_DIMENSION_TEXTURE1D;
@@ -286,7 +283,6 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 		} else {
 			return false;
 		}
-		break;
 	}
 
 	header.mCaps.mDWCaps1 =
@@ -301,7 +297,7 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 	VFile::File *file = VFile::File::FromHandle(handle);
 	file->Write(&header, sizeof(header));
 
-	if (headerDX10.mDXGIFormat) {
+	if (headerDX10.mDXGIFormat != DDS_DXGI_FORMAT_UNKNOWN) {
 		file->Write(&headerDX10, sizeof(headerDX10) * 1);
 	}
 
@@ -762,11 +758,11 @@ AL2O3_EXTERN_C bool Image_SaveKTX(Image_ImageHeader *image, VFile_Handle handle)
 	if(fmt == TKTX_UNDEFINED) return false;
 
 	// mipmaps or no linked only
-	if(image->nextType != Image_NextType::Image_IT_MipMaps &&
-			image->nextType != Image_NextType::Image_IT_None	) {
+	if(image->nextType != Image_NextType::Image_NT_MipMaps &&
+			image->nextType != Image_NextType::Image_NT_None	) {
 		return false;
 	}
-	uint32_t numMipmaps = (image->nextType == Image_NextType::Image_IT_None) ? 1 : (uint32_t)Image_LinkedImageCountOf(image);
+	uint32_t numMipmaps = (image->nextType == Image_NextType::Image_NT_None) ? 1 : (uint32_t)Image_LinkedImageCountOf(image);
 
 	uint32_t mipmapsizes[TINYKTX_MAX_MIPMAPLEVELS];
 	void const* mipmaps[TINYKTX_MAX_MIPMAPLEVELS];

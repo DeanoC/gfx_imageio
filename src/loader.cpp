@@ -782,7 +782,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 		}
 		if(prevImage) {
 			auto p = (Image_ImageHeader *)prevImage;
-			p->nextType = Image_NextType::Image_IT_MipMaps;
+			p->nextType = Image_NextType::Image_NT_MipMaps;
 			p->nextImage = image;
 		}
 		if(w > 1) w = w / 2;
