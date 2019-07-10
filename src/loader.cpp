@@ -743,9 +743,9 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	for(auto i = 0u; i < TinyKtx_NumberOfMipmaps(ctx);++i) {
 		Image_ImageHeader const *image = nullptr;
 		if(TinyKtx_IsCubemap(ctx)) {
-			image = Image_CreateCubemap(w,h, fmt);
+			image = Image_CreateCubemapArrayNoClear(w, h, s, fmt);
 		} else {
-			image = Image_CreateNoClear(w, h, d, s, fmt);
+			image = Image_Create2DArrayNoClear(w, h, s, fmt);
 		}
 
 		if(!image) break;
@@ -753,7 +753,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 
 		if(TinyKtx_IsMipMapLevelUnpacked(ctx, i)) {
 			uint32_t const srcStride = TinyKtx_UnpackedRowStride(ctx, i);
-			uint32_t const dstStride = Image_ByteCountPerRowOf(image);
+			uint32_t const dstStride = (uint32_t)Image_ByteCountPerRowOf(image);
 
 			auto src = (uint8_t const*) TinyKtx_ImageRawData(ctx, i);
 			auto dst = (uint8_t*)Image_RawDataPtr(image);
