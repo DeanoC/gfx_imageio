@@ -605,7 +605,12 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	};
 
 	auto ctx =  TinyKtx_CreateContext( &callbacks, handle);
-	TinyKtx_ReadHeader(ctx);
+	bool headerOkay = TinyKtx_ReadHeader(ctx);
+	if(!headerOkay) {
+		TinyKtx_DestroyContext(ctx);
+		return nullptr;
+	}
+
 	uint32_t w = TinyKtx_Width(ctx);
 	uint32_t h = TinyKtx_Height(ctx);
 	uint32_t d = TinyKtx_Depth(ctx);
@@ -684,7 +689,12 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 	};
 
 	auto ctx =  TinyDDS_CreateContext( &callbacks, handle);
-	TinyDDS_ReadHeader(ctx);
+	bool headerOkay = TinyDDS_ReadHeader(ctx);
+	if(!headerOkay) {
+		TinyDDS_DestroyContext(ctx);
+		return nullptr;
+	}
+
 	uint32_t w = TinyDDS_Width(ctx);
 	uint32_t h = TinyDDS_Height(ctx);
 	uint32_t d = TinyDDS_Depth(ctx);
