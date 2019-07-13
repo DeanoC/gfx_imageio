@@ -17,7 +17,7 @@ set(Interface
 		)
 
 set(Src
-		dds.hpp
+		tinydds.h
 		loader.cpp
 		saver.cpp
 		)
