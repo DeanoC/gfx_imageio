@@ -123,10 +123,10 @@ static TinyDDS_Format ImageFormatToTinyDDSFormat(ImageFormat fmt) {
 
 	// unsupported
 	// TODO Some of these can be
-	case ImageFormat_PVR_2BPP_BLOCK:
-	case ImageFormat_PVR_2BPPA_BLOCK:
-	case ImageFormat_PVR_4BPP_BLOCK:
-	case ImageFormat_PVR_4BPPA_BLOCK:
+	case ImageFormat_PVR_2BPP_UNORM_BLOCK:
+	case ImageFormat_PVR_2BPPA_UNORM_BLOCK:
+	case ImageFormat_PVR_4BPP_UNORM_BLOCK:
+	case ImageFormat_PVR_4BPPA_UNORM_BLOCK:
 	case ImageFormat_PVR_2BPP_SRGB_BLOCK:
 	case ImageFormat_PVR_2BPPA_SRGB_BLOCK:
 	case ImageFormat_PVR_4BPP_SRGB_BLOCK:
@@ -326,10 +326,10 @@ static TinyKtx_Format ImageFormatToTinyKtxFormat(ImageFormat format) {
 
 	case ImageFormat_BC7_UNORM_BLOCK: return TKTX_BC7_UNORM_BLOCK;
 	case ImageFormat_BC7_SRGB_BLOCK: return TKTX_BC7_SRGB_BLOCK;
-	case ImageFormat_PVR_2BPP_BLOCK: return TKTX_PVR_2BPP_BLOCK;
-	case ImageFormat_PVR_2BPPA_BLOCK: return TKTX_PVR_2BPPA_BLOCK;
-	case ImageFormat_PVR_4BPP_BLOCK: return TKTX_PVR_4BPP_BLOCK;
-	case ImageFormat_PVR_4BPPA_BLOCK: return TKTX_PVR_4BPPA_BLOCK;
+	case ImageFormat_PVR_2BPP_UNORM_BLOCK: return TKTX_PVR_2BPP_BLOCK;
+	case ImageFormat_PVR_2BPPA_UNORM_BLOCK: return TKTX_PVR_2BPPA_BLOCK;
+	case ImageFormat_PVR_4BPP_UNORM_BLOCK: return TKTX_PVR_4BPP_BLOCK;
+	case ImageFormat_PVR_4BPPA_UNORM_BLOCK: return TKTX_PVR_4BPPA_BLOCK;
 	case ImageFormat_PVR_2BPP_SRGB_BLOCK: return TKTX_PVR_2BPP_SRGB_BLOCK;
 	case ImageFormat_PVR_2BPPA_SRGB_BLOCK: return TKTX_PVR_2BPPA_SRGB_BLOCK;
 	case ImageFormat_PVR_4BPP_SRGB_BLOCK: return TKTX_PVR_4BPP_SRGB_BLOCK;

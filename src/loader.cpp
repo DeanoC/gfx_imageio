@@ -78,13 +78,13 @@ AL2O3_EXTERN_C Image_ImageHeader const * Image_LoadPVR(VFile_Handle handle) {
   bool isSrgb = (header.mColorSpace == 1);
 
   switch (header.mPixelFormat) {
-    case 0:format = isSrgb ? ImageFormat_PVR_2BPP_SRGB_BLOCK : ImageFormat_PVR_2BPP_BLOCK;
+    case 0:format = isSrgb ? ImageFormat_PVR_2BPP_SRGB_BLOCK : ImageFormat_PVR_2BPP_UNORM_BLOCK;
       break;
-    case 1:format = isSrgb ? ImageFormat_PVR_2BPPA_SRGB_BLOCK : ImageFormat_PVR_2BPPA_BLOCK;
+    case 1:format = isSrgb ? ImageFormat_PVR_2BPPA_SRGB_BLOCK : ImageFormat_PVR_2BPPA_UNORM_BLOCK;
       break;
-    case 2:format = isSrgb ? ImageFormat_PVR_4BPP_SRGB_BLOCK : ImageFormat_PVR_4BPP_BLOCK;
+    case 2:format = isSrgb ? ImageFormat_PVR_4BPP_SRGB_BLOCK : ImageFormat_PVR_4BPP_UNORM_BLOCK;
       break;
-    case 3:format = isSrgb ? ImageFormat_PVR_4BPPA_SRGB_BLOCK : ImageFormat_PVR_4BPPA_BLOCK;
+    case 3:format = isSrgb ? ImageFormat_PVR_4BPPA_SRGB_BLOCK : ImageFormat_PVR_4BPPA_UNORM_BLOCK;
       break;
     default:    // NOT SUPPORTED
       LOGERRORF("Load PVR failed: pixel type not supported. ");
