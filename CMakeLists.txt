@@ -28,7 +28,7 @@ set(Deps
 		al2o3_stb
 		al2o3_vfile
 		al2o3_syoyo
-		gfx_imageformat
+		tiny_imageformat
 		gfx_image_interface
 		utils_misccpp
 		tiny_ktx
