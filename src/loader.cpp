@@ -72,18 +72,18 @@ AL2O3_EXTERN_C Image_ImageHeader const * Image_LoadPVR(VFile_Handle handle) {
   uint32_t depth = header.mDepth;
   uint32_t slices = header.mNumSurfaces * header.mNumFaces;
   uint32_t mipMapCount = header.mNumMipMaps;
-  ImageFormat format = ImageFormat_UNDEFINED;
+  TinyImageFormat format = TinyImageFormat_UNDEFINED;
 
   bool isSrgb = (header.mColorSpace == 1);
 
   switch (header.mPixelFormat) {
-    case 0:format = isSrgb ? ImageFormat_PVR_2BPP_SRGB_BLOCK : ImageFormat_PVR_2BPP_UNORM_BLOCK;
+    case 0:format = isSrgb ? TinyImageFormat_PVR_2BPP_SRGB_BLOCK : TinyImageFormat_PVR_2BPP_UNORM_BLOCK;
       break;
-    case 1:format = isSrgb ? ImageFormat_PVR_2BPPA_SRGB_BLOCK : ImageFormat_PVR_2BPPA_UNORM_BLOCK;
+    case 1:format = isSrgb ? TinyImageFormat_PVR_2BPPA_SRGB_BLOCK : TinyImageFormat_PVR_2BPPA_UNORM_BLOCK;
       break;
-    case 2:format = isSrgb ? ImageFormat_PVR_4BPP_SRGB_BLOCK : ImageFormat_PVR_4BPP_UNORM_BLOCK;
+    case 2:format = isSrgb ? TinyImageFormat_PVR_4BPP_SRGB_BLOCK : TinyImageFormat_PVR_4BPP_UNORM_BLOCK;
       break;
-    case 3:format = isSrgb ? ImageFormat_PVR_4BPPA_SRGB_BLOCK : ImageFormat_PVR_4BPPA_UNORM_BLOCK;
+    case 3:format = isSrgb ? TinyImageFormat_PVR_4BPPA_SRGB_BLOCK : TinyImageFormat_PVR_4BPPA_UNORM_BLOCK;
       break;
     default:    // NOT SUPPORTED
       LOGERRORF("Load PVR failed: pixel type not supported. ");
@@ -141,17 +141,17 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadLDR(VFile_Handle handle) {
     requiredCmp = 4;
   }
 
-  ImageFormat format = ImageFormat_UNDEFINED;
+  TinyImageFormat format = TinyImageFormat_UNDEFINED;
   uint64_t memoryRequirement = sizeof(stbi_uc) * w * h * requiredCmp;
 
   switch (requiredCmp) {
-    case 1: format = ImageFormat_R8_UNORM;
+    case 1: format = TinyImageFormat_R8_UNORM;
       break;
-    case 2: format = ImageFormat_R8G8_UNORM;
+    case 2: format = TinyImageFormat_R8G8_UNORM;
       break;
-    case 3: format = ImageFormat_R8G8B8_UNORM;
+    case 3: format = TinyImageFormat_R8G8B8_UNORM;
       break;
-    case 4: format = ImageFormat_R8G8B8A8_UNORM;
+    case 4: format = TinyImageFormat_R8G8B8A8_UNORM;
       break;
   }
 
@@ -187,15 +187,15 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadHDR(VFile_Handle handle) {
 
   requiredCmp = cmp;
 
-  ImageFormat format = ImageFormat_UNDEFINED;
+  TinyImageFormat format = TinyImageFormat_UNDEFINED;
   switch (requiredCmp) {
-    case 1: format = ImageFormat_R32_SFLOAT;
+    case 1: format = TinyImageFormat_R32_SFLOAT;
       break;
-    case 2: format = ImageFormat_R32G32_SFLOAT;
+    case 2: format = TinyImageFormat_R32G32_SFLOAT;
       break;
-    case 3: format = ImageFormat_R32G32B32_SFLOAT;
+    case 3: format = TinyImageFormat_R32G32B32_SFLOAT;
       break;
-    case 4: format = ImageFormat_R32G32B32A32_SFLOAT;
+    case 4: format = TinyImageFormat_R32G32B32A32_SFLOAT;
       break;
   }
 
@@ -296,28 +296,28 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
     idxChannels[idxCur++] = idxA;
   }
 
-  ImageFormat format = ImageFormat_UNDEFINED;
+  TinyImageFormat format = TinyImageFormat_UNDEFINED;
 
   if(firstPixelType == TINYEXR_PIXELTYPE_FLOAT) {
     switch (numChannels) {
-      case 1: format = ImageFormat_R32_SFLOAT;
+      case 1: format = TinyImageFormat_R32_SFLOAT;
         break;
-      case 2: format = ImageFormat_R32G32_SFLOAT;
+      case 2: format = TinyImageFormat_R32G32_SFLOAT;
         break;
-      case 3:format = ImageFormat_R32G32B32_SFLOAT;
+      case 3:format = TinyImageFormat_R32G32B32_SFLOAT;
         break;
-      case 4: format = ImageFormat_R32G32B32A32_SFLOAT;
+      case 4: format = TinyImageFormat_R32G32B32A32_SFLOAT;
         break;
     }
   } else if(firstPixelType == TINYEXR_PIXELTYPE_HALF) {
     switch (numChannels) {
-      case 1: format = ImageFormat_R16_SFLOAT;
+      case 1: format = TinyImageFormat_R16_SFLOAT;
         break;
-      case 2: format = ImageFormat_R16G16_SFLOAT;
+      case 2: format = TinyImageFormat_R16G16_SFLOAT;
         break;
-      case 3:format = ImageFormat_R16G16B16_SFLOAT;
+      case 3:format = TinyImageFormat_R16G16B16_SFLOAT;
         break;
-      case 4: format = ImageFormat_R16G16B16A16_SFLOAT;
+      case 4: format = TinyImageFormat_R16G16B16A16_SFLOAT;
         break;
     }
   } else {
@@ -394,8 +394,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	uint32_t h = TinyKtx_Height(ctx);
 	uint32_t d = TinyKtx_Depth(ctx);
 	uint32_t s = TinyKtx_ArraySlices(ctx);
-	ImageFormat fmt = ImageFormat_FromTinyKtxFormat(TinyKtx_GetFormat(ctx));
-	if(fmt == ImageFormat_UNDEFINED) {
+	TinyImageFormat fmt = TinyImageFormat_FromTinyKtxFormat(TinyKtx_GetFormat(ctx));
+	if(fmt == TinyImageFormat_UNDEFINED) {
 		TinyKtx_DestroyContext(ctx);
 		return nullptr;
 	}
@@ -478,8 +478,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 	uint32_t h = TinyDDS_Height(ctx);
 	uint32_t d = TinyDDS_Depth(ctx);
 	uint32_t s = TinyDDS_ArraySlices(ctx);
-	ImageFormat fmt = ImageFormat_FromTinyDDSFormat(TinyDDS_GetFormat(ctx));
-	if(fmt == ImageFormat_UNDEFINED) {
+	TinyImageFormat fmt = TinyImageFormat_FromTinyDDSFormat(TinyDDS_GetFormat(ctx));
+	if(fmt == TinyImageFormat_UNDEFINED) {
 		TinyDDS_DestroyContext(ctx);
 		return nullptr;
 	}
