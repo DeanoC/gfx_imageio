@@ -17,7 +17,6 @@ set(Interface
 		)
 
 set(Src
-		tinydds.h
 		loader.cpp
 		saver.cpp
 		)
@@ -32,6 +31,7 @@ set(Deps
 		gfx_image_interface
 		utils_misccpp
 		tiny_ktx
+		tiny_dds
 		)
 ADD_LIB(${LibName} "${Interface}" "${Src}" "${Deps}")
 

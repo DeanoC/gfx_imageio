@@ -2,18 +2,17 @@
 #include "al2o3_cmath/scalar.h"
 #include "al2o3_stb/stb_image.h"
 #include "al2o3_vfile/vfile.hpp"
-#include "tiny_imageformat/format.h"
-#include "tiny_imageformat/formatcracker.h"
-#include "gfx_image/image.h"
-#include "gfx_image/utils.h"
-#include "al2o3_syoyo/tiny_exr.hpp"
 #include "utils_misccpp/compiletimehash.hpp"
-#include <float.h>
-#include "tiny_ktx/tinyktx.h"
 #include "gfx_image/create.h"
 
-#define TINYDDS_IMPLEMENTATION
-#include "tinydds.h"
+#include "tiny_imageformat/format.h"
+#include "gfx_image/image.h"
+#include "tiny_imageformat/formatcracker.h"
+#include "tiny_ktx/tinyktx.h"
+#include "tiny_dds/tinydds.h"
+#include "al2o3_syoyo/tiny_exr.hpp"
+
+#include <float.h>
 
 namespace {
 // PVR loader borrowed from https://github.com/ConfettiFX/The-Forge
