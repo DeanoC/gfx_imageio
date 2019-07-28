@@ -548,6 +548,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
       case "gif"_hash:
       case "pic"_hash:
       case "pnm"_hash:
+      case "ppm"_hash:
         return Image_LoadLDR(handle);
 		case "ktx2"_hash:
     case "ktx"_hash:
