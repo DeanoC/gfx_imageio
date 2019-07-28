@@ -484,42 +484,49 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 		return nullptr;
 	}
 
-	Image_ImageHeader const* topImage = nullptr;
-	Image_ImageHeader const* prevImage = nullptr;
+	// DDS store mipmaps of each cubemap faces together
+	// so face[0] -> all mipmaps for face 0
+	// so face[1] -> all mipmaps for face 1
+	// etc.
+	// we want it the other way
+	// mip[0] -> face[0], face[1], etc.
+	// mip[1] -> face[0], face[1], etc.
+
+	Image_ImageHeader const* images[TINYDDS_MAX_MIPMAPLEVELS];
 	for(auto i = 0u; i < TinyDDS_NumberOfMipmaps(ctx);++i) {
 		Image_ImageHeader const *image = nullptr;
-		if(TinyDDS_IsCubemap(ctx)) {
+		if (TinyDDS_IsCubemap(ctx)) {
 			image = Image_CreateCubemapArrayNoClear(w, h, s, fmt);
 		} else {
 			image = Image_Create2DArrayNoClear(w, h, s, fmt);
 		}
-
-		if(!image) break;
-		if(i == 0) topImage = image;
+		images[i] = image;
 
 		size_t const expectedSize = Image_ByteCountOf(image);
 		size_t const fileSize = TinyDDS_ImageSize(ctx, i);
-		if (expectedSize < fileSize) {
+		if (expectedSize != fileSize) {
 			LOGERRORF("DDS file %s mipmap %i size error %liu < %liu", VFile_GetName(handle), i, expectedSize, fileSize);
-			Image_Destroy(topImage);
+			for(auto j = 0u; j < TinyDDS_NumberOfMipmaps(ctx);++j) {
+				Image_Destroy(images[j]);
+			}
 			TinyDDS_DestroyContext(ctx);
 			return nullptr;
 		}
-		memcpy(Image_RawDataPtr(image), TinyDDS_ImageRawData(ctx, i), Image_ByteCountOf(image));
+		memcpy(Image_RawDataPtr(image), TinyDDS_ImageRawData(ctx, i), fileSize);
 
-		if(prevImage) {
-			auto p = (Image_ImageHeader *)prevImage;
+		if(i > 0) {
+			auto p = (Image_ImageHeader *)images[i-1];
 			p->nextType = Image_NextType::Image_NT_MipMaps;
 			p->nextImage = image;
 		}
+
 		if(w > 1) w = w / 2;
 		if(h > 1) h = h / 2;
 		if(d > 1) d = d / 2;
-		prevImage = image;
 	}
 
 	TinyDDS_DestroyContext(ctx);
-	return topImage;
+	return images[0];
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
