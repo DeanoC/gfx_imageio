@@ -499,8 +499,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 
 		size_t const expectedSize = Image_ByteCountOf(image);
 		size_t const fileSize = TinyDDS_ImageSize(ctx, i);
-		if (expectedSize > fileSize) {
-			LOGERRORF("DDS file %s mipmap %i size error %liu > %liu", VFile_GetName(handle), i, expectedSize, fileSize);
+		if (expectedSize < fileSize) {
+			LOGERRORF("DDS file %s mipmap %i size error %liu < %liu", VFile_GetName(handle), i, expectedSize, fileSize);
 			Image_Destroy(topImage);
 			TinyDDS_DestroyContext(ctx);
 			return nullptr;
