@@ -497,6 +497,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 		Image_ImageHeader const *image = nullptr;
 		if (TinyDDS_IsCubemap(ctx)) {
 			image = Image_CreateCubemapArrayNoClear(w, h, s, fmt);
+		} else if(TinyDDS_Is3D(ctx)){
+			image = Image_Create3DNoClear(w, h, d, fmt);
 		} else {
 			image = Image_Create2DArrayNoClear(w, h, s, fmt);
 		}
@@ -531,12 +533,13 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
   VFile::File *file = VFile::File::FromHandle(handle);
-  tinystl::string_view name = file->GetName();
-
+  tinystl::string name = file->GetName();
+	name = name.to_lower();
   if( auto pos = name.rfind('.') ) {
   	if(pos == tinystl::string_view::npos ) return nullptr;
 
     tinystl::string_view ext(name.data()+pos+1, name.size()-pos-1 );
+
     switch(Utils::CompileTimeHash(ext) ) {
       case "dds"_hash:
         return Image_LoadDDS(handle);
