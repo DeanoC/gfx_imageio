@@ -129,22 +129,17 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadLDR(VFile_Handle handle) {
 
   size_t origin = VFile_Tell(handle);
 
-  int w = 0, h = 0, cmp = 0, requiredCmp = 0;
+  int w = 0, h = 0, cmp = 0;
   stbi_info_from_callbacks(&callbacks, handle, &w, &h, &cmp);
 
-  if (w == 0 || h == 0 || cmp == 0) {
+  if (w <= 0 || h <= 0  || cmp <= 0 || cmp > 4) {
     return nullptr;
   }
 
-  requiredCmp = cmp;
-  if (cmp == 3) {
-    requiredCmp = 4;
-  }
-
   TinyImageFormat format = TinyImageFormat_UNDEFINED;
-  uint64_t memoryRequirement = sizeof(stbi_uc) * w * h * requiredCmp;
+  uint64_t memoryRequirement = sizeof(stbi_uc) * w * h * cmp;
 
-  switch (requiredCmp) {
+  switch (cmp) {
     case 1: format = TinyImageFormat_R8_UNORM;
       break;
     case 2: format = TinyImageFormat_R8G8_UNORM;
@@ -156,7 +151,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadLDR(VFile_Handle handle) {
   }
 
   VFile_Seek(handle, origin, VFile_SD_Begin);
-  stbi_uc *uncompressed = stbi_load_from_callbacks(&callbacks, handle, &w, &h, &cmp, requiredCmp);
+  stbi_uc *uncompressed = stbi_load_from_callbacks(&callbacks, handle, &w, &h, &cmp, cmp);
   if (uncompressed == nullptr) {
     return nullptr;
   }
