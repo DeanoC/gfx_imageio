@@ -231,8 +231,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
     return nullptr;
   }
 
-  // all support homogenous image (all formats the same)
-  int firstPixelType;
+  // only support homogenous image (all channels the same format)
+  int firstPixelType = 0;
   for (int i = 0; i < Math_MinI32(header.num_channels,4); i++) {
     if(i == 0) {
       firstPixelType = header.pixel_types[0];
@@ -293,31 +293,49 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 
   TinyImageFormat format = TinyImageFormat_UNDEFINED;
 
-  if(firstPixelType == TINYEXR_PIXELTYPE_FLOAT) {
-    switch (numChannels) {
-      case 1: format = TinyImageFormat_R32_SFLOAT;
-        break;
-      case 2: format = TinyImageFormat_R32G32_SFLOAT;
-        break;
-      case 3:format = TinyImageFormat_R32G32B32_SFLOAT;
-        break;
-      case 4: format = TinyImageFormat_R32G32B32A32_SFLOAT;
-        break;
-    }
-  } else if(firstPixelType == TINYEXR_PIXELTYPE_HALF) {
-    switch (numChannels) {
-      case 1: format = TinyImageFormat_R16_SFLOAT;
-        break;
-      case 2: format = TinyImageFormat_R16G16_SFLOAT;
-        break;
-      case 3:format = TinyImageFormat_R16G16B16_SFLOAT;
-        break;
-      case 4: format = TinyImageFormat_R16G16B16A16_SFLOAT;
-        break;
-    }
-  } else {
-    LOGERROR("EXR unsupported pixel type");
-    return nullptr;
+  switch(firstPixelType) {
+  case TINYEXR_PIXELTYPE_UINT:
+		switch (numChannels) {
+		case 1: format = TinyImageFormat_R32_UINT;
+			break;
+		case 2: format = TinyImageFormat_R32G32_UINT;
+			break;
+		case 3:format = TinyImageFormat_R32G32B32_UINT;
+			break;
+		case 4: format = TinyImageFormat_R32G32B32A32_UINT;
+			break;
+		default:
+			LOGERROR("EXR image has more than 4 channels.");
+			return nullptr;
+		}
+  case TINYEXR_PIXELTYPE_FLOAT:
+		switch (numChannels) {
+		case 1: format = TinyImageFormat_R32_SFLOAT;
+			break;
+		case 2: format = TinyImageFormat_R32G32_SFLOAT;
+			break;
+		case 3:format = TinyImageFormat_R32G32B32_SFLOAT;
+			break;
+		case 4: format = TinyImageFormat_R32G32B32A32_SFLOAT;
+			break;
+		default:
+			LOGERROR("EXR image has more than 4 channels.");
+			return nullptr;
+		}
+	case TINYEXR_PIXELTYPE_HALF:
+		switch (numChannels) {
+		case 1: format = TinyImageFormat_R16_SFLOAT;
+			break;
+		case 2: format = TinyImageFormat_R16G16_SFLOAT;
+			break;
+		case 3:format = TinyImageFormat_R16G16B16_SFLOAT;
+			break;
+		case 4: format = TinyImageFormat_R16G16B16A16_SFLOAT;
+			break;
+		default:
+			LOGERROR("EXR image has more than 4 channels.");
+			return nullptr;
+		}
   }
 
   // Create and extract the pixel data
@@ -339,9 +357,17 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
         out[i * numChannels + chn] = ((uint16_t**) exrImage.images)[idxChannels[chn]][i];
       }
     }
-  }
+  } else  if(firstPixelType == TINYEXR_PIXELTYPE_UINT) {
+		uint32_t * out = (uint32_t *)Image_RawDataPtr(image);
 
-  return image;
+		for (uint32_t i = 0; i < image->width * image->height; i++) {
+			for (int chn = 0; chn < numChannels; chn++) {
+				out[i * numChannels + chn] = ((uint32_t **) exrImage.images)[idxChannels[chn]][i];
+			}
+		}
+	}
+
+	return image;
 }
 static void tinyktxddsCallbackError(void *user, char const *msg) {
 	LOGERRORF("Tiny_ ERROR: %s", msg);
