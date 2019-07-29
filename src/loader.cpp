@@ -404,8 +404,10 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	Image_ImageHeader const* prevImage = nullptr;
 	for(auto i = 0u; i < TinyKtx_NumberOfMipmaps(ctx);++i) {
 		Image_ImageHeader const *image = nullptr;
-		if(TinyKtx_IsCubemap(ctx)) {
+		if (TinyKtx_IsCubemap(ctx)) {
 			image = Image_CreateCubemapArrayNoClear(w, h, s, fmt);
+		} else if(TinyKtx_Is3D(ctx)){
+			image = Image_Create3DNoClear(w, h, d, fmt);
 		} else {
 			image = Image_Create2DArrayNoClear(w, h, s, fmt);
 		}
