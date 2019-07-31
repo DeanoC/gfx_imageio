@@ -36,8 +36,6 @@ AL2O3_EXTERN_C bool Image_SaveTGA(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8_SINT:
 	case TinyImageFormat_R8_UNORM:
 	case TinyImageFormat_R8_SNORM:
-	case TinyImageFormat_R8_USCALED:
-	case TinyImageFormat_R8_SSCALED:
 	case TinyImageFormat_R8_SRGB:
 		return 0 != stbi_write_tga_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 1, src);
@@ -45,8 +43,6 @@ AL2O3_EXTERN_C bool Image_SaveTGA(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8_SINT:
 	case TinyImageFormat_R8G8_UNORM:
 	case TinyImageFormat_R8G8_SNORM:
-	case TinyImageFormat_R8G8_USCALED:
-	case TinyImageFormat_R8G8_SSCALED:
 	case TinyImageFormat_R8G8_SRGB:
 		return 0 != stbi_write_tga_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 2, src);
@@ -54,8 +50,6 @@ AL2O3_EXTERN_C bool Image_SaveTGA(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8_SINT:
 	case TinyImageFormat_R8G8B8_UNORM:
 	case TinyImageFormat_R8G8B8_SNORM:
-	case TinyImageFormat_R8G8B8_USCALED:
-	case TinyImageFormat_R8G8B8_SSCALED:
 	case TinyImageFormat_R8G8B8_SRGB:
 		return 0 != stbi_write_tga_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 3, src);
@@ -63,8 +57,6 @@ AL2O3_EXTERN_C bool Image_SaveTGA(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8A8_SINT:
 	case TinyImageFormat_R8G8B8A8_UNORM:
 	case TinyImageFormat_R8G8B8A8_SNORM:
-	case TinyImageFormat_R8G8B8A8_USCALED:
-	case TinyImageFormat_R8G8B8A8_SSCALED:
 	case TinyImageFormat_R8G8B8A8_SRGB:
 		return 0 != stbi_write_tga_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src);
@@ -89,8 +81,6 @@ AL2O3_EXTERN_C bool Image_SaveBMP(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8_SINT:
 	case TinyImageFormat_R8_UNORM:
 	case TinyImageFormat_R8_SNORM:
-	case TinyImageFormat_R8_USCALED:
-	case TinyImageFormat_R8_SSCALED:
 	case TinyImageFormat_R8_SRGB:
 		return 0 != stbi_write_bmp_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 1, src);
@@ -98,8 +88,6 @@ AL2O3_EXTERN_C bool Image_SaveBMP(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8_SINT:
 	case TinyImageFormat_R8G8_UNORM:
 	case TinyImageFormat_R8G8_SNORM:
-	case TinyImageFormat_R8G8_USCALED:
-	case TinyImageFormat_R8G8_SSCALED:
 	case TinyImageFormat_R8G8_SRGB:
 		return 0 != stbi_write_bmp_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 2, src);
@@ -107,8 +95,6 @@ AL2O3_EXTERN_C bool Image_SaveBMP(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8_SINT:
 	case TinyImageFormat_R8G8B8_UNORM:
 	case TinyImageFormat_R8G8B8_SNORM:
-	case TinyImageFormat_R8G8B8_USCALED:
-	case TinyImageFormat_R8G8B8_SSCALED:
 	case TinyImageFormat_R8G8B8_SRGB:
 		return 0 != stbi_write_bmp_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 3, src);
@@ -116,8 +102,6 @@ AL2O3_EXTERN_C bool Image_SaveBMP(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8A8_SINT:
 	case TinyImageFormat_R8G8B8A8_UNORM:
 	case TinyImageFormat_R8G8B8A8_SNORM:
-	case TinyImageFormat_R8G8B8A8_USCALED:
-	case TinyImageFormat_R8G8B8A8_SSCALED:
 	case TinyImageFormat_R8G8B8A8_SRGB:
 		return 0 != stbi_write_bmp_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src);
@@ -142,8 +126,6 @@ AL2O3_EXTERN_C bool Image_SavePNG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8_SINT:
 	case TinyImageFormat_R8_UNORM:
 	case TinyImageFormat_R8_SNORM:
-	case TinyImageFormat_R8_USCALED:
-	case TinyImageFormat_R8_SSCALED:
 	case TinyImageFormat_R8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 1, src, 0);
@@ -151,8 +133,6 @@ AL2O3_EXTERN_C bool Image_SavePNG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8_SINT:
 	case TinyImageFormat_R8G8_UNORM:
 	case TinyImageFormat_R8G8_SNORM:
-	case TinyImageFormat_R8G8_USCALED:
-	case TinyImageFormat_R8G8_SSCALED:
 	case TinyImageFormat_R8G8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 2, src, 0);
@@ -160,8 +140,6 @@ AL2O3_EXTERN_C bool Image_SavePNG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8_SINT:
 	case TinyImageFormat_R8G8B8_UNORM:
 	case TinyImageFormat_R8G8B8_SNORM:
-	case TinyImageFormat_R8G8B8_USCALED:
-	case TinyImageFormat_R8G8B8_SSCALED:
 	case TinyImageFormat_R8G8B8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 3, src, 0);
@@ -169,8 +147,6 @@ AL2O3_EXTERN_C bool Image_SavePNG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8A8_SINT:
 	case TinyImageFormat_R8G8B8A8_UNORM:
 	case TinyImageFormat_R8G8B8A8_SNORM:
-	case TinyImageFormat_R8G8B8A8_USCALED:
-	case TinyImageFormat_R8G8B8A8_SSCALED:
 	case TinyImageFormat_R8G8B8A8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src, 0);
@@ -195,8 +171,6 @@ AL2O3_EXTERN_C bool Image_SaveJPG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8_SINT:
 	case TinyImageFormat_R8_UNORM:
 	case TinyImageFormat_R8_SNORM:
-	case TinyImageFormat_R8_USCALED:
-	case TinyImageFormat_R8_SSCALED:
 	case TinyImageFormat_R8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 1, src, 0);
@@ -204,8 +178,6 @@ AL2O3_EXTERN_C bool Image_SaveJPG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8_SINT:
 	case TinyImageFormat_R8G8_UNORM:
 	case TinyImageFormat_R8G8_SNORM:
-	case TinyImageFormat_R8G8_USCALED:
-	case TinyImageFormat_R8G8_SSCALED:
 	case TinyImageFormat_R8G8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 2, src, 0);
@@ -213,8 +185,6 @@ AL2O3_EXTERN_C bool Image_SaveJPG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8_SINT:
 	case TinyImageFormat_R8G8B8_UNORM:
 	case TinyImageFormat_R8G8B8_SNORM:
-	case TinyImageFormat_R8G8B8_USCALED:
-	case TinyImageFormat_R8G8B8_SSCALED:
 	case TinyImageFormat_R8G8B8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 3, src, 0);
@@ -222,9 +192,7 @@ AL2O3_EXTERN_C bool Image_SaveJPG(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R8G8B8A8_SINT:
 	case TinyImageFormat_R8G8B8A8_UNORM:
 	case TinyImageFormat_R8G8B8A8_SNORM:
-	case TinyImageFormat_R8G8B8A8_USCALED:
-	case TinyImageFormat_R8G8B8A8_SSCALED:
-	case TinyImageFormat_R8G8B8A8_SRGB:
+		case TinyImageFormat_R8G8B8A8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src, 0);
 	default: {
