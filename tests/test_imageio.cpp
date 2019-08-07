@@ -1,6 +1,6 @@
 #include "al2o3_platform/platform.h"
 #include "gfx_image/image.h"
-#include "tiny_imageformat/formatcracker.h"
+#include "tiny_imageformat/tinyimageformat.h"
 #include "gfx_imageio/io.h"
 #include "al2o3_os/filesystem.h"
 #include "al2o3_vfile/vfile.hpp"
