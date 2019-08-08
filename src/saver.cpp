@@ -263,7 +263,7 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 	if(fmt == TDDS_UNDEFINED) return false;
 
 	// mipmaps or no linked only
-	if(image->nextType != Image_NextType::Image_NT_MipMaps &&
+	if(image->nextType != Image_NextType::Image_NT_MipMap &&
 			image->nextType != Image_NextType::Image_NT_None	) {
 		return false;
 	}
@@ -306,7 +306,7 @@ AL2O3_EXTERN_C bool Image_SaveKTX(Image_ImageHeader *image, VFile_Handle handle)
 	if(fmt == TKTX_UNDEFINED) return false;
 
 	// mipmaps or no linked only
-	if(image->nextType != Image_NextType::Image_NT_MipMaps &&
+	if(image->nextType != Image_NextType::Image_NT_MipMap &&
 			image->nextType != Image_NextType::Image_NT_None	) {
 		return false;
 	}

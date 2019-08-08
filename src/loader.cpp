@@ -466,7 +466,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 		}
 		if(prevImage) {
 			auto p = (Image_ImageHeader *)prevImage;
-			p->nextType = Image_NextType::Image_NT_MipMaps;
+			p->nextType = Image_NextType::Image_NT_MipMap;
 			p->nextImage = image;
 		}
 		if(w > 1) w = w / 2;
@@ -540,7 +540,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 
 		if(i > 0) {
 			auto p = (Image_ImageHeader *)images[i-1];
-			p->nextType = Image_NextType::Image_NT_MipMaps;
+			p->nextType = Image_NextType::Image_NT_MipMap;
 			p->nextImage = image;
 		}
 
