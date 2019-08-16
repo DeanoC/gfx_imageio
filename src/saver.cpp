@@ -1,12 +1,11 @@
 #include "al2o3_platform/platform.h"
 #include "al2o3_stb/stb_image_write.h"
 #include "al2o3_vfile/vfile.hpp"
-#include "tiny_imageformat/tinyimageformat.h"
+#include "tiny_imageformat/tinyimageformat_base.h"
 #include "gfx_image/image.h"
 
 #include "tiny_ktx/tinyktx.h"
 #include "tiny_dds/tinydds.h"
-#include <float.h>
 
 // TODO EXR
 //#include "syoyo/tiny_exr.hpp"

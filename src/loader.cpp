@@ -5,7 +5,7 @@
 #include "utils_misccpp/compiletimehash.hpp"
 #include "gfx_image/create.h"
 
-#include "tiny_imageformat/tinyimageformat.h"
+#include "tiny_imageformat/tinyimageformat_base.h"
 #include "gfx_image/image.h"
 #include "tiny_ktx/tinyktx.h"
 #include "tiny_dds/tinydds.h"
