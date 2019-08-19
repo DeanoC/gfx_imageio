@@ -13,13 +13,21 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadHDR(VFile_Handle handle);
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle);
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle);
 
-AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader const *image, VFile_Handle handle);
-AL2O3_EXTERN_C bool Image_SaveTGA(Image_ImageHeader const *image, VFile_Handle handle);
-AL2O3_EXTERN_C bool Image_SaveBMP(Image_ImageHeader const *image, VFile_Handle handle);
-AL2O3_EXTERN_C bool Image_SavePNG(Image_ImageHeader const *image, VFile_Handle handle);
-AL2O3_EXTERN_C bool Image_SaveJPG(Image_ImageHeader const *image, VFile_Handle handle);
-AL2O3_EXTERN_C bool Image_SaveHDR(Image_ImageHeader const *image, VFile_Handle handle);
-AL2O3_EXTERN_C bool Image_SaveKTX(Image_ImageHeader const *image, VFile_Handle handle);
+AL2O3_EXTERN_C bool Image_SaveAsDDS(Image_ImageHeader const *image, VFile_Handle handle);
+AL2O3_EXTERN_C bool Image_SaveAsTGA(Image_ImageHeader const *image, VFile_Handle handle);
+AL2O3_EXTERN_C bool Image_SaveAsBMP(Image_ImageHeader const *image, VFile_Handle handle);
+AL2O3_EXTERN_C bool Image_SaveAsPNG(Image_ImageHeader const *image, VFile_Handle handle);
+AL2O3_EXTERN_C bool Image_SaveAsJPG(Image_ImageHeader const *image, VFile_Handle handle);
+AL2O3_EXTERN_C bool Image_SaveAsHDR(Image_ImageHeader const *image, VFile_Handle handle);
+AL2O3_EXTERN_C bool Image_SaveAsKTX(Image_ImageHeader const *image, VFile_Handle handle);
+
+AL2O3_EXTERN_C bool Image_CanSaveAsDDS(Image_ImageHeader const *image);
+AL2O3_EXTERN_C bool Image_CanSaveAsTGA(Image_ImageHeader const *image);
+AL2O3_EXTERN_C bool Image_CanSaveAsBMP(Image_ImageHeader const *image);
+AL2O3_EXTERN_C bool Image_CanSaveAsPNG(Image_ImageHeader const *image);
+AL2O3_EXTERN_C bool Image_CanSaveAsJPG(Image_ImageHeader const *image);
+AL2O3_EXTERN_C bool Image_CanSaveAsHDR(Image_ImageHeader const *image);
+AL2O3_EXTERN_C bool Image_CanSaveAsKTX(Image_ImageHeader const *image);
 
 // try to figure out which format the file is in and load it
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle);

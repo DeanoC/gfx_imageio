@@ -19,7 +19,7 @@ static void stbIoCallbackWrite(void *user, void *data, int size) {
 	VFile_Write(handle, data, size);
 }
 
-AL2O3_EXTERN_C bool Image_SaveTGA(Image_ImageHeader *image, VFile_Handle handle) {
+AL2O3_EXTERN_C bool Image_SaveAsTGA(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 
 	if (!handle) {
@@ -64,7 +64,7 @@ AL2O3_EXTERN_C bool Image_SaveTGA(Image_ImageHeader *image, VFile_Handle handle)
 	}
 }
 
-AL2O3_EXTERN_C bool Image_SaveBMP(Image_ImageHeader *image, VFile_Handle handle) {
+AL2O3_EXTERN_C bool Image_SaveAsBMP(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 
 	if (!handle) {
@@ -109,7 +109,7 @@ AL2O3_EXTERN_C bool Image_SaveBMP(Image_ImageHeader *image, VFile_Handle handle)
 	}
 }
 
-AL2O3_EXTERN_C bool Image_SavePNG(Image_ImageHeader *image, VFile_Handle handle) {
+AL2O3_EXTERN_C bool Image_SaveAsPNG(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 
 	if (!handle) {
@@ -118,43 +118,27 @@ AL2O3_EXTERN_C bool Image_SavePNG(Image_ImageHeader *image, VFile_Handle handle)
 	void *src = Image_RawDataPtr(image);
 
 	switch (image->format) {
-	case TinyImageFormat_R8_UINT:
-	case TinyImageFormat_R8_SINT:
 	case TinyImageFormat_R8_UNORM:
-	case TinyImageFormat_R8_SNORM:
 	case TinyImageFormat_R8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 1, src, 0);
-	case TinyImageFormat_R8G8_UINT:
-	case TinyImageFormat_R8G8_SINT:
 	case TinyImageFormat_R8G8_UNORM:
-	case TinyImageFormat_R8G8_SNORM:
 	case TinyImageFormat_R8G8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 2, src, 0);
-	case TinyImageFormat_R8G8B8_UINT:
-	case TinyImageFormat_R8G8B8_SINT:
 	case TinyImageFormat_R8G8B8_UNORM:
-	case TinyImageFormat_R8G8B8_SNORM:
 	case TinyImageFormat_R8G8B8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 3, src, 0);
-	case TinyImageFormat_R8G8B8A8_UINT:
-	case TinyImageFormat_R8G8B8A8_SINT:
 	case TinyImageFormat_R8G8B8A8_UNORM:
-	case TinyImageFormat_R8G8B8A8_SNORM:
 	case TinyImageFormat_R8G8B8A8_SRGB:
 		return 0 != stbi_write_png_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src, 0);
-	default: {
-		// uncompress/convert and try again
-		//return convertAndSaveImage(*this, &Image::iSaveTGA, fileName);
-		return false;
-	}
+	default: return false;
 	}
 }
 
-AL2O3_EXTERN_C bool Image_SaveJPG(Image_ImageHeader *image, VFile_Handle handle) {
+AL2O3_EXTERN_C bool Image_SaveAsJPG(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 
 	if (!handle) {
@@ -163,43 +147,28 @@ AL2O3_EXTERN_C bool Image_SaveJPG(Image_ImageHeader *image, VFile_Handle handle)
 	void *src = Image_RawDataPtr(image);
 
 	switch (image->format) {
-	case TinyImageFormat_R8_UINT:
-	case TinyImageFormat_R8_SINT:
 	case TinyImageFormat_R8_UNORM:
-	case TinyImageFormat_R8_SNORM:
 	case TinyImageFormat_R8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 1, src, 0);
-	case TinyImageFormat_R8G8_UINT:
-	case TinyImageFormat_R8G8_SINT:
 	case TinyImageFormat_R8G8_UNORM:
-	case TinyImageFormat_R8G8_SNORM:
 	case TinyImageFormat_R8G8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 2, src, 0);
-	case TinyImageFormat_R8G8B8_UINT:
-	case TinyImageFormat_R8G8B8_SINT:
 	case TinyImageFormat_R8G8B8_UNORM:
-	case TinyImageFormat_R8G8B8_SNORM:
 	case TinyImageFormat_R8G8B8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 3, src, 0);
-	case TinyImageFormat_R8G8B8A8_UINT:
-	case TinyImageFormat_R8G8B8A8_SINT:
 	case TinyImageFormat_R8G8B8A8_UNORM:
-	case TinyImageFormat_R8G8B8A8_SNORM:
-		case TinyImageFormat_R8G8B8A8_SRGB:
+	case TinyImageFormat_R8G8B8A8_SRGB:
 		return 0 != stbi_write_jpg_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src, 0);
-	default: {
-		// uncompress/convert and try again
-		//return convertAndSaveImage(*this, &Image::iSaveTGA, fileName);
+	default:
 		return false;
-	}
 	}
 }
 
-AL2O3_EXTERN_C bool Image_SaveHDR(Image_ImageHeader *image, VFile_Handle handle) {
+AL2O3_EXTERN_C bool Image_SaveAsHDR(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 
 	if (!handle) {
@@ -220,11 +189,8 @@ AL2O3_EXTERN_C bool Image_SaveHDR(Image_ImageHeader *image, VFile_Handle handle)
 	case TinyImageFormat_R32G32B32A32_SFLOAT:
 		return 0 != stbi_write_hdr_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src);
-	default: {
-		// uncompress/convert and try again
-		//return convertAndSaveImage(*this, &Image::iSaveTGA, fileName);
+	default:
 		return false;
-	}
 	}
 }
 
@@ -247,7 +213,7 @@ static void tinyktxCallbackWrite(void *user, void const *data, size_t size) {
 	VFile_Write(handle, data, size);
 }
 
-AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle) {
+AL2O3_EXTERN_C bool Image_SaveAsDDS(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 	TinyDDS_WriteCallbacks callback{
 			&tinyktxCallbackError,
@@ -255,8 +221,6 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 			&tinyktxCallbackFree,
 			&tinyktxCallbackWrite,
 	};
-
-
 
 	TinyDDS_Format fmt = TinyImageFormat_ToTinyDDSFormat(image->format);
 	if(fmt == TDDS_UNDEFINED) return false;
@@ -292,7 +256,7 @@ AL2O3_EXTERN_C bool Image_SaveDDS(Image_ImageHeader *image, VFile_Handle handle)
 														mipmaps );
 }
 
-AL2O3_EXTERN_C bool Image_SaveKTX(Image_ImageHeader *image, VFile_Handle handle) {
+AL2O3_EXTERN_C bool Image_SaveAsKTX(Image_ImageHeader *image, VFile_Handle handle) {
 	using namespace Image;
 	TinyKtx_WriteCallbacks callback{
 		&tinyktxCallbackError,
@@ -332,4 +296,104 @@ AL2O3_EXTERN_C bool Image_SaveKTX(Image_ImageHeader *image, VFile_Handle handle)
 										 Image_IsCubemap(image),
 										 mipmapsizes,
 										 mipmaps );
+}
+
+
+AL2O3_EXTERN_C bool Image_CanSaveAsTGA(Image_ImageHeader const *image) {
+	if(!Image_Is1D(image) || !Image_Is2D(image)) return false;
+
+	switch (image->format) {
+	case TinyImageFormat_R8_UNORM:
+	case TinyImageFormat_R8_SRGB:
+	case TinyImageFormat_R8G8_UNORM:
+	case TinyImageFormat_R8G8_SRGB:
+	case TinyImageFormat_R8G8B8_UNORM:
+	case TinyImageFormat_R8G8B8_SRGB:
+	case TinyImageFormat_R8G8B8A8_UNORM:
+	case TinyImageFormat_R8G8B8A8_SRGB:
+		return true;
+	default: return false;
+	}
+}
+
+AL2O3_EXTERN_C bool Image_CanSaveAsBMP(Image_ImageHeader const *image) {
+	if(!Image_Is1D(image) || !Image_Is2D(image)) return false;
+
+	switch (image->format) {
+	case TinyImageFormat_R8_UNORM:
+	case TinyImageFormat_R8_SRGB:
+	case TinyImageFormat_R8G8_UNORM:
+	case TinyImageFormat_R8G8_SRGB:
+	case TinyImageFormat_R8G8B8_UNORM:
+	case TinyImageFormat_R8G8B8_SRGB:
+	case TinyImageFormat_R8G8B8A8_UNORM:
+	case TinyImageFormat_R8G8B8A8_SRGB:
+		return true;
+	default: return false;
+	}
+}
+AL2O3_EXTERN_C bool Image_CanSaveAsPNG(Image_ImageHeader const *image) {
+	if(!Image_Is1D(image) || !Image_Is2D(image)) return false;
+
+	switch (image->format) {
+	case TinyImageFormat_R8_UNORM:
+	case TinyImageFormat_R8_SRGB:
+	case TinyImageFormat_R8G8_UNORM:
+	case TinyImageFormat_R8G8_SRGB:
+	case TinyImageFormat_R8G8B8_UNORM:
+	case TinyImageFormat_R8G8B8_SRGB:
+	case TinyImageFormat_R8G8B8A8_UNORM:
+	case TinyImageFormat_R8G8B8A8_SRGB:
+		return true;
+	default: return false;
+	}
+
+}
+AL2O3_EXTERN_C bool Image_CanSaveAsJPG(Image_ImageHeader const *image) {
+	if(!Image_Is1D(image) || !Image_Is2D(image)) return false;
+
+	switch (image->format) {
+	case TinyImageFormat_R8_UNORM:
+	case TinyImageFormat_R8_SRGB:
+	case TinyImageFormat_R8G8_UNORM:
+	case TinyImageFormat_R8G8_SRGB:
+	case TinyImageFormat_R8G8B8_UNORM:
+	case TinyImageFormat_R8G8B8_SRGB:
+	case TinyImageFormat_R8G8B8A8_UNORM:
+	case TinyImageFormat_R8G8B8A8_SRGB:
+		return true;
+	default:
+		return false;
+	}
+
+}
+
+AL2O3_EXTERN_C bool Image_CanSaveAsHDR(Image_ImageHeader const *image) {
+	if(!Image_Is1D(image) || !Image_Is2D(image)) return false;
+
+	switch (image->format) {
+	case TinyImageFormat_R32_SFLOAT:
+	case TinyImageFormat_R32G32_SFLOAT:
+	case TinyImageFormat_R32G32B32_SFLOAT:
+	case TinyImageFormat_R32G32B32A32_SFLOAT:
+		return true;
+	default:
+		return false;
+	}
+
+}
+
+AL2O3_EXTERN_C bool Image_CanSaveAsDDS(Image_ImageHeader const *image) {
+	if(Image_Is3D(image) && Image_IsArray(image)) return false;
+
+	TinyDDS_Format fmt = TinyImageFormat_ToTinyDDSFormat(image->format);
+	return !(fmt == TDDS_UNDEFINED);
+}
+
+AL2O3_EXTERN_C bool Image_CanSaveAsKTX(Image_ImageHeader const *image) {
+	if(Image_Is3D(image) && Image_IsArray(image)) return false;
+
+	TinyKtx_Format fmt = TinyImageFormat_ToTinyKtxFormat(image->format);
+	return !(fmt == TKTX_UNDEFINED);
+
 }
