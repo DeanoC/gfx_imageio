@@ -230,7 +230,7 @@ AL2O3_EXTERN_C bool Image_SaveAsDDS(Image_ImageHeader *image, VFile_Handle handl
 			image->nextType != Image_NextType::Image_NT_None	) {
 		return false;
 	}
-	uint32_t numMipmaps = (image->nextType == Image_NextType::Image_NT_None) ? 1 : (uint32_t)Image_LinkedImageCountOf(image);
+	uint32_t numMipmaps = (uint32_t)Image_MipMapCountOf(image);
 
 	uint32_t mipmapsizes[TINYDDS_MAX_MIPMAPLEVELS];
 	void const* mipmaps[TINYDDS_MAX_MIPMAPLEVELS];
@@ -273,7 +273,7 @@ AL2O3_EXTERN_C bool Image_SaveAsKTX(Image_ImageHeader *image, VFile_Handle handl
 			image->nextType != Image_NextType::Image_NT_None	) {
 		return false;
 	}
-	uint32_t numMipmaps = (image->nextType == Image_NextType::Image_NT_None) ? 1 : (uint32_t)Image_LinkedImageCountOf(image);
+	uint32_t numMipmaps = (uint32_t)Image_MipMapCountOf(image);
 
 	uint32_t mipmapsizes[TINYKTX_MAX_MIPMAPLEVELS];
 	void const* mipmaps[TINYKTX_MAX_MIPMAPLEVELS];
