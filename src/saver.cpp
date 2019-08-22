@@ -45,8 +45,6 @@ AL2O3_EXTERN_C bool Image_SaveAsTGA(Image_ImageHeader *image, VFile_Handle handl
 		return 0 != stbi_write_tga_to_func(&stbIoCallbackWrite, handle,
 																			 image->width, image->height, 4, src);
 	default: {
-		// uncompress/convert and try again
-		//return convertAndSaveImage(*this, &Image::iSaveTGA, fileName);
 		return false;
 	}
 	}
@@ -361,6 +359,8 @@ AL2O3_EXTERN_C bool Image_CanSaveAsDDS(Image_ImageHeader const *image) {
 	if(Image_Is3D(image) && Image_IsArray(image)) return false;
 
 	TinyDDS_Format fmt = TinyImageFormat_ToTinyDDSFormat(image->format);
+	// this isn't completely correct... if its an array only dx10 formats
+	// can be used. Need to add support to check for this
 	return !(fmt == TDDS_UNDEFINED);
 }
 
