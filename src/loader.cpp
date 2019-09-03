@@ -37,263 +37,261 @@ const unsigned int gPvrtexV3HeaderVersion = 0x03525650;
 } // end anon namespace
 
 
-AL2O3_EXTERN_C Image_ImageHeader const * Image_LoadPVR(VFile_Handle handle) {
-  // TODO: Image
-  // - no support for PVRTC2 at the moment since it isn't supported on iOS devices.
-  // - only new PVR header V3 is supported at the moment.  Should we add legacy for V2 and V1?
-  // - metadata is ignored for now.  Might be useful to implement it if the need for metadata arises (eg. padding, atlas coordinates, orientations, border data, etc...).
-  // - flags are also ignored for now.  Currently a flag of 0x02 means that the color have been pre-multiplied byt the alpha values.
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadPVR(VFile_Handle handle) {
+	// TODO: Image
+	// - no support for PVRTC2 at the moment since it isn't supported on iOS devices.
+	// - only new PVR header V3 is supported at the moment.  Should we add legacy for V2 and V1?
+	// - metadata is ignored for now.  Might be useful to implement it if the need for metadata arises (eg. padding, atlas coordinates, orientations, border data, etc...).
+	// - flags are also ignored for now.  Currently a flag of 0x02 means that the color have been pre-multiplied byt the alpha values.
 
-  // Assumptions:
-  // - it's assumed that the texture is already twiddled (ie. Morton).  This should always be the case for PVRTC V3.
+	// Assumptions:
+	// - it's assumed that the texture is already twiddled (ie. Morton).  This should always be the case for PVRTC V3.
 
-  PVR_Texture_Header header;
-  VFile::File *file = VFile::File::FromHandle(handle);
-  file->Read(&header, sizeof(header));
+	PVR_Texture_Header header;
+	VFile::File *file = VFile::File::FromHandle(handle);
+	file->Read(&header, sizeof(header));
 
-  if (header.mVersion != gPvrtexV3HeaderVersion) {
-    LOGERRORF("Load PVR failed: Not a valid PVR V3 header.");
-    return nullptr;
-  }
+	if (header.mVersion != gPvrtexV3HeaderVersion) {
+		LOGERRORF("Load PVR failed: Not a valid PVR V3 header.");
+		return nullptr;
+	}
 
-  if (header.mPixelFormat > 3) {
-    LOGERRORF("Load PVR failed: Not a supported PVR pixel format.  Only PVRTC is supported at the moment.");
-    return nullptr;
-  }
+	if (header.mPixelFormat > 3) {
+		LOGERRORF("Load PVR failed: Not a supported PVR pixel format.  Only PVRTC is supported at the moment.");
+		return nullptr;
+	}
 
-  if (header.mNumSurfaces > 1 && header.mNumFaces > 1) {
-    LOGERRORF("Load PVR failed: Loading arrays of cubemaps isn't supported.");
-    return nullptr;
-  }
+	if (header.mNumSurfaces > 1 && header.mNumFaces > 1) {
+		LOGERRORF("Load PVR failed: Loading arrays of cubemaps isn't supported.");
+		return nullptr;
+	}
 
-  uint32_t width = header.mWidth;
-  uint32_t height = header.mHeight;
-  uint32_t depth = header.mDepth;
-  uint32_t slices = header.mNumSurfaces * header.mNumFaces;
-  uint32_t mipMapCount = header.mNumMipMaps;
-  TinyImageFormat format = TinyImageFormat_UNDEFINED;
+	uint32_t width = header.mWidth;
+	uint32_t height = header.mHeight;
+	uint32_t depth = header.mDepth;
+	uint32_t slices = header.mNumSurfaces * header.mNumFaces;
+	uint32_t mipMapCount = header.mNumMipMaps;
+	TinyImageFormat format = TinyImageFormat_UNDEFINED;
 
-  bool isSrgb = (header.mColorSpace == 1);
+	bool isSrgb = (header.mColorSpace == 1);
 
-  switch (header.mPixelFormat) {
-    case 0:
-    case 1:
-    	format = isSrgb ? TinyImageFormat_PVRTC1_2BPP_SRGB : TinyImageFormat_PVRTC1_2BPP_UNORM;
-    	break;
-    case 2:
-		case 3:
-			format = isSrgb ? TinyImageFormat_PVRTC1_4BPP_SRGB : TinyImageFormat_PVRTC1_4BPP_UNORM;
-      break;
-    default:    // NOT SUPPORTED
-      LOGERRORF("Load PVR failed: pixel type not supported. ");
-      return nullptr;
-  }
+	switch (header.mPixelFormat) {
+	case 0:
+	case 1: format = isSrgb ? TinyImageFormat_PVRTC1_2BPP_SRGB : TinyImageFormat_PVRTC1_2BPP_UNORM;
+		break;
+	case 2:
+	case 3: format = isSrgb ? TinyImageFormat_PVRTC1_4BPP_SRGB : TinyImageFormat_PVRTC1_4BPP_UNORM;
+		break;
+	default:    // NOT SUPPORTED
+		LOGERRORF("Load PVR failed: pixel type not supported. ");
+		return nullptr;
+	}
 
-  // TODO Dean load mipmaps
-  // TODO read pvr data so no mipmaps at all for now :(
+	// TODO Dean load mipmaps
+	// TODO read pvr data so no mipmaps at all for now :(
 
-  // skip the meta data
-  file->Seek(header.mMetaDataSize, VFile_SD_Current);
+	// skip the meta data
+	file->Seek(header.mMetaDataSize, VFile_SD_Current);
 
-  // Create and extract the pixel data
-  auto image = Image_Create(width, height, depth, slices, format);
+	// Create and extract the pixel data
+	auto image = Image_Create(width, height, depth, slices, format);
 
-  file->Read(Image_RawDataPtr(image), Image_ByteCountOf(image));
-  // TODO we should skip to the end here, but we
-  // don't have pack or streams files so no harm yet
+	file->Read(Image_RawDataPtr(image), Image_ByteCountOf(image));
+	// TODO we should skip to the end here, but we
+	// don't have pack or streams files so no harm yet
 
-  return image;
+	return image;
 }
 
 static int stbIoCallbackRead(void *user, char *data, int size) {
-  VFile_Handle handle = (VFile_Handle) user;
-  return (int) VFile_Read(handle, data, size);
+	VFile_Handle handle = (VFile_Handle) user;
+	return (int) VFile_Read(handle, data, size);
 }
 static void stbIoCallbackSkip(void *user, int n) {
-  VFile_Handle handle = (VFile_Handle) user;
-  VFile_Seek(handle, n, VFile_SD_Current);
+	VFile_Handle handle = (VFile_Handle) user;
+	VFile_Seek(handle, n, VFile_SD_Current);
 }
 static int stbIoCallbackEof(void *user) {
-  VFile_Handle handle = (VFile_Handle) user;
-  return VFile_IsEOF(handle);
+	VFile_Handle handle = (VFile_Handle) user;
+	return VFile_IsEOF(handle);
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadLDR(VFile_Handle handle) {
 
-  stbi_io_callbacks callbacks{
-      &stbIoCallbackRead,
-      &stbIoCallbackSkip,
-      &stbIoCallbackEof
-  };
+	stbi_io_callbacks callbacks{
+			&stbIoCallbackRead,
+			&stbIoCallbackSkip,
+			&stbIoCallbackEof
+	};
 
-  size_t origin = VFile_Tell(handle);
+	size_t origin = VFile_Tell(handle);
 
-  int w = 0, h = 0, cmp = 0;
-  stbi_info_from_callbacks(&callbacks, handle, &w, &h, &cmp);
+	int w = 0, h = 0, cmp = 0;
+	stbi_info_from_callbacks(&callbacks, handle, &w, &h, &cmp);
 
-  if (w <= 0 || h <= 0  || cmp <= 0 || cmp > 4) {
-    return nullptr;
-  }
+	if (w <= 0 || h <= 0 || cmp <= 0 || cmp > 4) {
+		return nullptr;
+	}
 
-  TinyImageFormat format = TinyImageFormat_UNDEFINED;
-  uint64_t memoryRequirement = sizeof(stbi_uc) * w * h * cmp;
+	TinyImageFormat format = TinyImageFormat_UNDEFINED;
+	uint64_t memoryRequirement = sizeof(stbi_uc) * w * h * cmp;
 
-  switch (cmp) {
-    case 1: format = TinyImageFormat_R8_UNORM;
-      break;
-    case 2: format = TinyImageFormat_R8G8_UNORM;
-      break;
-    case 3: format = TinyImageFormat_R8G8B8_UNORM;
-      break;
-    case 4: format = TinyImageFormat_R8G8B8A8_UNORM;
-      break;
-  }
+	switch (cmp) {
+	case 1: format = TinyImageFormat_R8_UNORM;
+		break;
+	case 2: format = TinyImageFormat_R8G8_UNORM;
+		break;
+	case 3: format = TinyImageFormat_R8G8B8_UNORM;
+		break;
+	case 4: format = TinyImageFormat_R8G8B8A8_UNORM;
+		break;
+	}
 
-  VFile_Seek(handle, origin, VFile_SD_Begin);
-  stbi_uc *uncompressed = stbi_load_from_callbacks(&callbacks, handle, &w, &h, &cmp, cmp);
-  if (uncompressed == nullptr) {
-    return nullptr;
-  }
+	VFile_Seek(handle, origin, VFile_SD_Begin);
+	stbi_uc *uncompressed = stbi_load_from_callbacks(&callbacks, handle, &w, &h, &cmp, cmp);
+	if (uncompressed == nullptr) {
+		return nullptr;
+	}
 
-  // Create and extract the pixel data
-  auto image = Image_Create(w, h, 1, 1, format);
-  ASSERT(memoryRequirement == Image_ByteCountOf(image));
+	// Create and extract the pixel data
+	auto image = Image_Create(w, h, 1, 1, format);
+	ASSERT(memoryRequirement == Image_ByteCountOf(image));
 
-  memcpy(Image_RawDataPtr(image), uncompressed, memoryRequirement);
-  stbi_image_free(uncompressed);
-  return image;
+	memcpy(Image_RawDataPtr(image), uncompressed, memoryRequirement);
+	stbi_image_free(uncompressed);
+	return image;
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadHDR(VFile_Handle handle) {
 
-  stbi_io_callbacks callbacks{
-      &stbIoCallbackRead,
-      &stbIoCallbackSkip,
-      &stbIoCallbackEof
-  };
+	stbi_io_callbacks callbacks{
+			&stbIoCallbackRead,
+			&stbIoCallbackSkip,
+			&stbIoCallbackEof
+	};
 
-  int w = 0, h = 0, cmp = 0, requiredCmp = 0;
-  stbi_info_from_callbacks(&callbacks, handle, &w, &h, &cmp);
+	int w = 0, h = 0, cmp = 0, requiredCmp = 0;
+	stbi_info_from_callbacks(&callbacks, handle, &w, &h, &cmp);
 
-  if (w == 0 || h == 0 || cmp == 0) {
-    return nullptr;
-  }
+	if (w == 0 || h == 0 || cmp == 0) {
+		return nullptr;
+	}
 
-  requiredCmp = cmp;
+	requiredCmp = cmp;
 
-  TinyImageFormat format = TinyImageFormat_UNDEFINED;
-  switch (requiredCmp) {
-    case 1: format = TinyImageFormat_R32_SFLOAT;
-      break;
-    case 2: format = TinyImageFormat_R32G32_SFLOAT;
-      break;
-    case 3: format = TinyImageFormat_R32G32B32_SFLOAT;
-      break;
-    case 4: format = TinyImageFormat_R32G32B32A32_SFLOAT;
-      break;
-  }
+	TinyImageFormat format = TinyImageFormat_UNDEFINED;
+	switch (requiredCmp) {
+	case 1: format = TinyImageFormat_R32_SFLOAT;
+		break;
+	case 2: format = TinyImageFormat_R32G32_SFLOAT;
+		break;
+	case 3: format = TinyImageFormat_R32G32B32_SFLOAT;
+		break;
+	case 4: format = TinyImageFormat_R32G32B32A32_SFLOAT;
+		break;
+	}
 
-  uint64_t memoryRequirement = sizeof(float) * w * h * requiredCmp;
+	uint64_t memoryRequirement = sizeof(float) * w * h * requiredCmp;
 
-  float *uncompressed = stbi_loadf_from_callbacks(&callbacks, handle, &w, &h, &cmp, requiredCmp);
-  if (uncompressed == nullptr) {
-    return nullptr;
-  }
+	float *uncompressed = stbi_loadf_from_callbacks(&callbacks, handle, &w, &h, &cmp, requiredCmp);
+	if (uncompressed == nullptr) {
+		return nullptr;
+	}
 
-  // Create and extract the pixel data
-  auto image = Image_Create(w, h, 1, 1, format);
-  ASSERT(memoryRequirement == Image_ByteCountOf(image));
+	// Create and extract the pixel data
+	auto image = Image_Create(w, h, 1, 1, format);
+	ASSERT(memoryRequirement == Image_ByteCountOf(image));
 
-  memcpy(Image_RawDataPtr(image), uncompressed, memoryRequirement);
-  stbi_image_free(uncompressed);
-  return image;
+	memcpy(Image_RawDataPtr(image), uncompressed, memoryRequirement);
+	stbi_image_free(uncompressed);
+	return image;
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
-  VFile::File *file = VFile::File::FromHandle(handle);
+	VFile::File *file = VFile::File::FromHandle(handle);
 
-  using namespace tinyexr;
-  EXRVersion version;
-  EXRHeader header;
-  InitEXRHeader(&header);
-  int ret = 0;
-  ret = ParseEXRVersion(&version, handle);
-  if (ret != 0) {
-    LOGERRORF("Parse EXR error");
-    return nullptr;
-  }
-
-  file->Seek(0, VFile_SD_Begin);
-  ret = ParseEXRHeader(&header, &version, handle);
-  if (ret != 0) {
-    LOGERRORF("Parse EXR error");
-    return nullptr;
-  }
-
-  // only support homogenous image (all channels the same format)
-  int firstPixelType = 0;
-  for (int i = 0; i < Math_MinI32(header.num_channels,4); i++) {
-    if(i == 0) {
-      firstPixelType = header.pixel_types[0];
-    } else {
-      if(header.pixel_types[i] != firstPixelType) {
-        LOGERROR("EXR image not homogenous");
-        return nullptr;
-      }
-    }
-  }
-
-  EXRImage exrImage;
-  InitEXRImage(&exrImage);
+	using namespace tinyexr;
+	EXRVersion version;
+	EXRHeader header;
+	InitEXRHeader(&header);
+	int ret = 0;
+	ret = ParseEXRVersion(&version, handle);
+	if (ret != 0) {
+		LOGERRORF("Parse EXR error");
+		return nullptr;
+	}
 
 	file->Seek(0, VFile_SD_Begin);
-  ret = LoadEXRImage(&exrImage, &header, handle);
-  if (ret != 0) {
-    LOGERRORF("Load EXR error\n");
-    return nullptr;
-  }
+	ret = ParseEXRHeader(&header, &version, handle);
+	if (ret != 0) {
+		LOGERRORF("Parse EXR error");
+		return nullptr;
+	}
 
-  // RGBA
-  int idxR = -1;
-  int idxG = -1;
-  int idxB = -1;
-  int idxA = -1;
-  int numChannels = 0;
-  for (int c = 0; c < header.num_channels; c++) {
-    if (strcmp(header.channels[c].name, "R") == 0) {
-      idxR = c;
-      numChannels++;
-    } else if (strcmp(header.channels[c].name, "G") == 0) {
-      idxG = c;
-      numChannels++;
-    } else if (strcmp(header.channels[c].name, "B") == 0) {
-      idxB = c;
-      numChannels++;
-    } else if (strcmp(header.channels[c].name, "A") == 0) {
-      idxA = c;
-      numChannels++;
-    }
-  }
+	// only support homogenous image (all channels the same format)
+	int firstPixelType = 0;
+	for (int i = 0; i < Math_MinI32(header.num_channels, 4); i++) {
+		if (i == 0) {
+			firstPixelType = header.pixel_types[0];
+		} else {
+			if (header.pixel_types[i] != firstPixelType) {
+				LOGERROR("EXR image not homogenous");
+				return nullptr;
+			}
+		}
+	}
 
-  int idxChannels[] = {-1, -1, -1, -1};
-  int idxCur = 0;
-  if (idxR != -1) {
-    idxChannels[idxCur++] = idxR;
-  }
-  if (idxG != -1) {
-    idxChannels[idxCur++] = idxG;
-  }
-  if (idxB != -1) {
-    idxChannels[idxCur++] = idxB;
-  }
-  if (idxA != -1) {
-    idxChannels[idxCur++] = idxA;
-  }
+	EXRImage exrImage;
+	InitEXRImage(&exrImage);
 
-  TinyImageFormat format = TinyImageFormat_UNDEFINED;
+	file->Seek(0, VFile_SD_Begin);
+	ret = LoadEXRImage(&exrImage, &header, handle);
+	if (ret != 0) {
+		LOGERRORF("Load EXR error\n");
+		return nullptr;
+	}
 
-  switch(firstPixelType) {
-  case TINYEXR_PIXELTYPE_UINT:
+	// RGBA
+	int idxR = -1;
+	int idxG = -1;
+	int idxB = -1;
+	int idxA = -1;
+	int numChannels = 0;
+	for (int c = 0; c < header.num_channels; c++) {
+		if (strcmp(header.channels[c].name, "R") == 0) {
+			idxR = c;
+			numChannels++;
+		} else if (strcmp(header.channels[c].name, "G") == 0) {
+			idxG = c;
+			numChannels++;
+		} else if (strcmp(header.channels[c].name, "B") == 0) {
+			idxB = c;
+			numChannels++;
+		} else if (strcmp(header.channels[c].name, "A") == 0) {
+			idxA = c;
+			numChannels++;
+		}
+	}
+
+	int idxChannels[] = {-1, -1, -1, -1};
+	int idxCur = 0;
+	if (idxR != -1) {
+		idxChannels[idxCur++] = idxR;
+	}
+	if (idxG != -1) {
+		idxChannels[idxCur++] = idxG;
+	}
+	if (idxB != -1) {
+		idxChannels[idxCur++] = idxB;
+	}
+	if (idxA != -1) {
+		idxChannels[idxCur++] = idxA;
+	}
+
+	TinyImageFormat format = TinyImageFormat_UNDEFINED;
+
+	switch (firstPixelType) {
+	case TINYEXR_PIXELTYPE_UINT:
 		switch (numChannels) {
 		case 1: format = TinyImageFormat_R32_UINT;
 			break;
@@ -303,11 +301,10 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 			break;
 		case 4: format = TinyImageFormat_R32G32B32A32_UINT;
 			break;
-		default:
-			LOGERROR("EXR image has more than 4 channels.");
+		default: LOGERROR("EXR image has more than 4 channels.");
 			return nullptr;
 		}
-  case TINYEXR_PIXELTYPE_FLOAT:
+	case TINYEXR_PIXELTYPE_FLOAT:
 		switch (numChannels) {
 		case 1: format = TinyImageFormat_R32_SFLOAT;
 			break;
@@ -317,8 +314,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 			break;
 		case 4: format = TinyImageFormat_R32G32B32A32_SFLOAT;
 			break;
-		default:
-			LOGERROR("EXR image has more than 4 channels.");
+		default: LOGERROR("EXR image has more than 4 channels.");
 			return nullptr;
 		}
 	case TINYEXR_PIXELTYPE_HALF:
@@ -331,33 +327,32 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 			break;
 		case 4: format = TinyImageFormat_R16G16B16A16_SFLOAT;
 			break;
-		default:
-			LOGERROR("EXR image has more than 4 channels.");
+		default: LOGERROR("EXR image has more than 4 channels.");
 			return nullptr;
 		}
-  }
+	}
 
-  // Create and extract the pixel data
-  auto image = Image_Create(exrImage.width, exrImage.height, 1, 1, format);
+	// Create and extract the pixel data
+	auto image = Image_Create(exrImage.width, exrImage.height, 1, 1, format);
 
-  if(firstPixelType == TINYEXR_PIXELTYPE_FLOAT) {
-    float* out = (float*)Image_RawDataPtr(image);
+	if (firstPixelType == TINYEXR_PIXELTYPE_FLOAT) {
+		float *out = (float *) Image_RawDataPtr(image);
 
-    for (uint32_t i = 0; i < image->width * image->height; i++) {
-      for (int chn = 0; chn < numChannels; chn++) {
-        out[i * numChannels + chn] = ((float**) exrImage.images)[idxChannels[chn]][i];
-      }
-    }
-  } else if(firstPixelType == TINYEXR_PIXELTYPE_HALF) {
-    uint16_t* out = (uint16_t*)Image_RawDataPtr(image);
+		for (uint32_t i = 0; i < image->width * image->height; i++) {
+			for (int chn = 0; chn < numChannels; chn++) {
+				out[i * numChannels + chn] = ((float **) exrImage.images)[idxChannels[chn]][i];
+			}
+		}
+	} else if (firstPixelType == TINYEXR_PIXELTYPE_HALF) {
+		uint16_t *out = (uint16_t *) Image_RawDataPtr(image);
 
-    for (uint32_t i = 0; i < image->width * image->height; i++) {
-      for (int chn = 0; chn < numChannels; chn++) {
-        out[i * numChannels + chn] = ((uint16_t**) exrImage.images)[idxChannels[chn]][i];
-      }
-    }
-  } else  if(firstPixelType == TINYEXR_PIXELTYPE_UINT) {
-		uint32_t * out = (uint32_t *)Image_RawDataPtr(image);
+		for (uint32_t i = 0; i < image->width * image->height; i++) {
+			for (int chn = 0; chn < numChannels; chn++) {
+				out[i * numChannels + chn] = ((uint16_t **) exrImage.images)[idxChannels[chn]][i];
+			}
+		}
+	} else if (firstPixelType == TINYEXR_PIXELTYPE_UINT) {
+		uint32_t *out = (uint32_t *) Image_RawDataPtr(image);
 
 		for (uint32_t i = 0; i < image->width * image->height; i++) {
 			for (int chn = 0; chn < numChannels; chn++) {
@@ -377,7 +372,7 @@ static void *tinyktxddsCallbackAlloc(void *user, size_t size) {
 static void tinyktxddsCallbackFree(void *user, void *data) {
 	MEMORY_FREE(data);
 }
-static size_t tinyktxddsCallbackRead(void *user, void* data, size_t size) {
+static size_t tinyktxddsCallbackRead(void *user, void *data, size_t size) {
 	auto handle = (VFile_Handle) user;
 	return VFile_Read(handle, data, size);
 }
@@ -391,10 +386,8 @@ static int64_t tinyktxddsCallbackTell(void *user) {
 	return VFile_Tell(handle);
 }
 
-
-
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
-	TinyKtx_Callbacks callbacks {
+	TinyKtx_Callbacks callbacks{
 			&tinyktxddsCallbackError,
 			&tinyktxddsCallbackAlloc,
 			&tinyktxddsCallbackFree,
@@ -403,9 +396,9 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 			&tinyktxddsCallbackTell
 	};
 
-	auto ctx =  TinyKtx_CreateContext( &callbacks, handle);
+	auto ctx = TinyKtx_CreateContext(&callbacks, handle);
 	bool headerOkay = TinyKtx_ReadHeader(ctx);
-	if(!headerOkay) {
+	if (!headerOkay) {
 		TinyKtx_DestroyContext(ctx);
 		return nullptr;
 	}
@@ -415,32 +408,34 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 	uint32_t d = TinyKtx_Depth(ctx);
 	uint32_t s = TinyKtx_ArraySlices(ctx);
 	TinyImageFormat fmt = TinyImageFormat_FromTinyKtxFormat(TinyKtx_GetFormat(ctx));
-	if(fmt == TinyImageFormat_UNDEFINED) {
+	if (fmt == TinyImageFormat_UNDEFINED) {
 		TinyKtx_DestroyContext(ctx);
 		return nullptr;
 	}
 
-	Image_ImageHeader const* topImage = nullptr;
-	Image_ImageHeader const* prevImage = nullptr;
-	for(auto i = 0u; i < TinyKtx_NumberOfMipmaps(ctx);++i) {
+	Image_ImageHeader const *topImage = nullptr;
+	Image_ImageHeader const *prevImage = nullptr;
+	for (auto i = 0u; i < TinyKtx_NumberOfMipmaps(ctx); ++i) {
 		Image_ImageHeader const *image = nullptr;
 		if (TinyKtx_IsCubemap(ctx)) {
 			image = Image_CreateCubemapArrayNoClear(w, h, s, fmt);
-		} else if(TinyKtx_Is3D(ctx)){
+		} else if (TinyKtx_Is3D(ctx)) {
 			image = Image_Create3DNoClear(w, h, d, fmt);
 		} else {
 			image = Image_Create2DArrayNoClear(w, h, s, fmt);
 		}
 
-		if(!image) break;
-		if(i == 0) topImage = image;
+		if (!image)
+			break;
+		if (i == 0)
+			topImage = image;
 
-		if(TinyKtx_IsMipMapLevelUnpacked(ctx, i)) {
+		if (TinyKtx_IsMipMapLevelUnpacked(ctx, i)) {
 			uint32_t const srcStride = TinyKtx_UnpackedRowStride(ctx, i);
-			uint32_t const dstStride = (uint32_t)Image_ByteCountPerRowOf(image);
+			uint32_t const dstStride = (uint32_t) Image_ByteCountPerRowOf(image);
 
-			auto src = (uint8_t const*) TinyKtx_ImageRawData(ctx, i);
-			auto dst = (uint8_t*)Image_RawDataPtr(image);
+			auto src = (uint8_t const *) TinyKtx_ImageRawData(ctx, i);
+			auto dst = (uint8_t *) Image_RawDataPtr(image);
 
 			for (uint32_t ww = 0u; ww < image->slices; ++ww) {
 				for (uint32_t zz = 0; zz < image->depth; ++zz) {
@@ -464,14 +459,17 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 			}
 			memcpy(Image_RawDataPtr(image), TinyKtx_ImageRawData(ctx, i), Image_ByteCountOf(image));
 		}
-		if(prevImage) {
-			auto p = (Image_ImageHeader *)prevImage;
+		if (prevImage) {
+			auto p = (Image_ImageHeader *) prevImage;
 			p->nextType = Image_NextType::Image_NT_MipMap;
 			p->nextImage = image;
 		}
-		if(w > 1) w = w / 2;
-		if(h > 1) h = h / 2;
-		if(d > 1) d = d / 2;
+		if (w > 1)
+			w = w / 2;
+		if (h > 1)
+			h = h / 2;
+		if (d > 1)
+			d = d / 2;
 		prevImage = image;
 	}
 
@@ -480,7 +478,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
-	TinyDDS_Callbacks callbacks {
+	TinyDDS_Callbacks callbacks{
 			&tinyktxddsCallbackError,
 			&tinyktxddsCallbackAlloc,
 			&tinyktxddsCallbackFree,
@@ -489,9 +487,9 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 			&tinyktxddsCallbackTell
 	};
 
-	auto ctx =  TinyDDS_CreateContext( &callbacks, handle);
+	auto ctx = TinyDDS_CreateContext(&callbacks, handle);
 	bool headerOkay = TinyDDS_ReadHeader(ctx);
-	if(!headerOkay) {
+	if (!headerOkay) {
 		TinyDDS_DestroyContext(ctx);
 		return nullptr;
 	}
@@ -501,7 +499,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 	uint32_t d = TinyDDS_Depth(ctx);
 	uint32_t s = TinyDDS_ArraySlices(ctx);
 	TinyImageFormat fmt = TinyImageFormat_FromTinyDDSFormat(TinyDDS_GetFormat(ctx));
-	if(fmt == TinyImageFormat_UNDEFINED) {
+	if (fmt == TinyImageFormat_UNDEFINED) {
 		TinyDDS_DestroyContext(ctx);
 		return nullptr;
 	}
@@ -514,12 +512,12 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 	// mip[0] -> face[0], face[1], etc.
 	// mip[1] -> face[0], face[1], etc.
 
-	Image_ImageHeader const* images[TINYDDS_MAX_MIPMAPLEVELS];
-	for(auto i = 0u; i < TinyDDS_NumberOfMipmaps(ctx);++i) {
+	Image_ImageHeader const *images[TINYDDS_MAX_MIPMAPLEVELS];
+	for (auto i = 0u; i < TinyDDS_NumberOfMipmaps(ctx); ++i) {
 		Image_ImageHeader const *image = nullptr;
 		if (TinyDDS_IsCubemap(ctx)) {
 			image = Image_CreateCubemapArrayNoClear(w, h, s, fmt);
-		} else if(TinyDDS_Is3D(ctx)){
+		} else if (TinyDDS_Is3D(ctx)) {
 			image = Image_Create3DNoClear(w, h, d, fmt);
 		} else {
 			image = Image_Create2DArrayNoClear(w, h, s, fmt);
@@ -530,7 +528,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 		size_t const fileSize = TinyDDS_ImageSize(ctx, i);
 		if (expectedSize != fileSize) {
 			LOGERRORF("DDS file %s mipmap %i size error %liu < %liu", VFile_GetName(handle), i, expectedSize, fileSize);
-			for(auto j = 0u; j < TinyDDS_NumberOfMipmaps(ctx);++j) {
+			for (auto j = 0u; j < TinyDDS_NumberOfMipmaps(ctx); ++j) {
 				Image_Destroy(images[j]);
 			}
 			TinyDDS_DestroyContext(ctx);
@@ -538,15 +536,18 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 		}
 		memcpy(Image_RawDataPtr(image), TinyDDS_ImageRawData(ctx, i), fileSize);
 
-		if(i > 0) {
-			auto p = (Image_ImageHeader *)images[i-1];
+		if (i > 0) {
+			auto p = (Image_ImageHeader *) images[i - 1];
 			p->nextType = Image_NextType::Image_NT_MipMap;
 			p->nextImage = image;
 		}
 
-		if(w > 1) w = w / 2;
-		if(h > 1) h = h / 2;
-		if(d > 1) d = d / 2;
+		if (w > 1)
+			w = w / 2;
+		if (h > 1)
+			h = h / 2;
+		if (d > 1)
+			d = d / 2;
 	}
 
 	TinyDDS_DestroyContext(ctx);
@@ -554,41 +555,35 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
-  VFile::File *file = VFile::File::FromHandle(handle);
-  tinystl::string name = file->GetName();
+	VFile::File *file = VFile::File::FromHandle(handle);
+	tinystl::string name = file->GetName();
 	name = name.to_lower();
-  if( auto pos = name.rfind('.') ) {
-  	if(pos == tinystl::string_view::npos ) return nullptr;
+	if (auto pos = name.rfind('.')) {
+		if (pos == tinystl::string_view::npos)
+			return nullptr;
 
-    tinystl::string_view ext(name.data()+pos+1, name.size()-pos-1 );
+		tinystl::string_view ext(name.data() + pos + 1, name.size() - pos - 1);
 
-    switch(Utils::CompileTimeHash(ext) ) {
-      case "dds"_hash:
-        return Image_LoadDDS(handle);
-      case "pvr"_hash:
-        return Image_LoadPVR(handle);
-      case "exr"_hash:
-        return Image_LoadEXR(handle);
-      case "hdr"_hash:
-        return Image_LoadHDR(handle);
-      case "jpg"_hash:
-      case "jpeg"_hash:
-      case "png"_hash:
-      case "tga"_hash:
-      case "bmp"_hash:
-      case "psd"_hash:
-      case "gif"_hash:
-      case "pic"_hash:
-      case "pnm"_hash:
-      case "ppm"_hash:
-        return Image_LoadLDR(handle);
-		case "ktx2"_hash:
-    case "ktx"_hash:
-    	return Image_LoadKTX(handle);
-      default:
-        return nullptr;
-    }
-  } else {
-    return nullptr;
-  }
+		switch (Utils::CompileTimeHash(ext)) {
+		case "dds"_hash:return Image_LoadDDS(handle);
+		case "pvr"_hash:return Image_LoadPVR(handle);
+		case "exr"_hash:return Image_LoadEXR(handle);
+		case "hdr"_hash:return Image_LoadHDR(handle);
+		case "jpg"_hash:
+		case "jpeg"_hash:
+		case "png"_hash:
+		case "tga"_hash:
+		case "bmp"_hash:
+		case "psd"_hash:
+		case "gif"_hash:
+		case "pic"_hash:
+		case "pnm"_hash:
+		case "ppm"_hash:return Image_LoadLDR(handle);
+			//case "ktx2"_hash:
+		case "ktx"_hash: return Image_LoadKTX(handle);
+		default:return nullptr;
+		}
+	} else {
+		return nullptr;
+	}
 }
