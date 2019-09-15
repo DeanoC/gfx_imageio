@@ -169,7 +169,7 @@ AL2O3_EXTERN_C bool Image_SaveAsHDR(Image_ImageHeader *image, VFile_Handle handl
 
 
 static void tinyktxCallbackError(void *user, char const *msg) {
-	LOGERRORF("Tiny_Ktx ERROR: %s", msg);
+	LOGERROR("Tiny_Ktx ERROR: %s", msg);
 }
 
 static void *tinyktxCallbackAlloc(void *user, size_t size) {

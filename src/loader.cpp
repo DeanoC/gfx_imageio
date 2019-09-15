@@ -52,17 +52,17 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadPVR(VFile_Handle handle) {
 	file->Read(&header, sizeof(header));
 
 	if (header.mVersion != gPvrtexV3HeaderVersion) {
-		LOGERRORF("Load PVR failed: Not a valid PVR V3 header.");
+		LOGERROR("Load PVR failed: Not a valid PVR V3 header.");
 		return nullptr;
 	}
 
 	if (header.mPixelFormat > 3) {
-		LOGERRORF("Load PVR failed: Not a supported PVR pixel format.  Only PVRTC is supported at the moment.");
+		LOGERROR("Load PVR failed: Not a supported PVR pixel format.  Only PVRTC is supported at the moment.");
 		return nullptr;
 	}
 
 	if (header.mNumSurfaces > 1 && header.mNumFaces > 1) {
-		LOGERRORF("Load PVR failed: Loading arrays of cubemaps isn't supported.");
+		LOGERROR("Load PVR failed: Loading arrays of cubemaps isn't supported.");
 		return nullptr;
 	}
 
@@ -83,7 +83,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadPVR(VFile_Handle handle) {
 	case 3: format = isSrgb ? TinyImageFormat_PVRTC1_4BPP_SRGB : TinyImageFormat_PVRTC1_4BPP_UNORM;
 		break;
 	default:    // NOT SUPPORTED
-		LOGERRORF("Load PVR failed: pixel type not supported. ");
+		LOGERROR("Load PVR failed: pixel type not supported. ");
 		return nullptr;
 	}
 
@@ -217,14 +217,14 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 	int ret = 0;
 	ret = ParseEXRVersion(&version, handle);
 	if (ret != 0) {
-		LOGERRORF("Parse EXR error");
+		LOGERROR("Parse EXR error");
 		return nullptr;
 	}
 
 	file->Seek(0, VFile_SD_Begin);
 	ret = ParseEXRHeader(&header, &version, handle);
 	if (ret != 0) {
-		LOGERRORF("Parse EXR error");
+		LOGERROR("Parse EXR error");
 		return nullptr;
 	}
 
@@ -247,7 +247,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 	file->Seek(0, VFile_SD_Begin);
 	ret = LoadEXRImage(&exrImage, &header, handle);
 	if (ret != 0) {
-		LOGERRORF("Load EXR error\n");
+		LOGERROR("Load EXR error\n");
 		return nullptr;
 	}
 
@@ -364,7 +364,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
 	return image;
 }
 static void tinyktxddsCallbackError(void *user, char const *msg) {
-	LOGERRORF("Tiny_ ERROR: %s", msg);
+	LOGERROR("Tiny_ ERROR: %s", msg);
 }
 static void *tinyktxddsCallbackAlloc(void *user, size_t size) {
 	return MEMORY_MALLOC(size);
@@ -452,7 +452,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle) {
 			size_t const expectedSize = Image_ByteCountOf(image);
 			size_t const fileSize = TinyKtx_ImageSize(ctx, i);
 			if (expectedSize > fileSize) {
-				LOGERRORF("KTX file %s mipmap %i size error %liu > %liu", VFile_GetName(handle), i, expectedSize, fileSize);
+				LOGERROR("KTX file %s mipmap %i size error %liu > %liu", VFile_GetName(handle), i, expectedSize, fileSize);
 				Image_Destroy(topImage);
 				TinyKtx_DestroyContext(ctx);
 				return nullptr;
@@ -527,7 +527,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 		size_t const expectedSize = Image_ByteCountOf(image);
 		size_t const fileSize = TinyDDS_ImageSize(ctx, i);
 		if (expectedSize != fileSize) {
-			LOGERRORF("DDS file %s mipmap %i size error %liu < %liu", VFile_GetName(handle), i, expectedSize, fileSize);
+			LOGERROR("DDS file %s mipmap %i size error %liu < %liu", VFile_GetName(handle), i, expectedSize, fileSize);
 			for (auto j = 0u; j < TinyDDS_NumberOfMipmaps(ctx); ++j) {
 				Image_Destroy(images[j]);
 			}
