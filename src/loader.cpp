@@ -10,6 +10,7 @@
 #include "tiny_ktx/tinyktx.h"
 #include "tiny_dds/tinydds.h"
 #include "al2o3_syoyo/tiny_exr.hpp"
+#include "gfx_imageio/basisu.h"
 
 #include <float.h>
 
@@ -542,16 +543,40 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadDDS(VFile_Handle handle) {
 			p->nextImage = image;
 		}
 
-		if (w > 1)
+		if (w > 1) {
 			w = w / 2;
-		if (h > 1)
+		}
+		if (h > 1) {
 			h = h / 2;
-		if (d > 1)
+		}
+		if (d > 1) {
 			d = d / 2;
+		}
 	}
 
 	TinyDDS_DestroyContext(ctx);
 	return images[0];
+}
+
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadBasisU(VFile_Handle handle) {
+	Image_BasisUHandle basisU = Image_CreateBasisU(handle);
+	if (!basisU) {
+		return nullptr;
+	}
+	bool okay = Image_BasisURead(basisU);
+	if (!okay) {
+		Image_DestroyBasisU(basisU);
+		return nullptr;
+	}
+	if (Image_BasisUImageCount(basisU) == 0) {
+		Image_DestroyBasisU(basisU);
+		return nullptr;
+	}
+	// we only support the first image for now
+	Image_ImageHeader const *image = Image_BasisUReadImage(basisU, 0);
+	Image_DestroyBasisU(basisU);
+
+	return image;
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
@@ -559,29 +584,32 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
 	tinystl::string name = file->GetName();
 	name = name.to_lower();
 	if (auto pos = name.rfind('.')) {
-		if (pos == tinystl::string_view::npos)
+		if (pos == tinystl::string_view::npos) {
 			return nullptr;
+		}
 
 		tinystl::string_view ext(name.data() + pos + 1, name.size() - pos - 1);
 
 		switch (Utils::CompileTimeHash(ext)) {
-		case "dds"_hash:return Image_LoadDDS(handle);
-		case "pvr"_hash:return Image_LoadPVR(handle);
-		case "exr"_hash:return Image_LoadEXR(handle);
-		case "hdr"_hash:return Image_LoadHDR(handle);
-		case "jpg"_hash:
-		case "jpeg"_hash:
-		case "png"_hash:
-		case "tga"_hash:
-		case "bmp"_hash:
-		case "psd"_hash:
-		case "gif"_hash:
-		case "pic"_hash:
-		case "pnm"_hash:
-		case "ppm"_hash:return Image_LoadLDR(handle);
-			//case "ktx2"_hash:
-		case "ktx"_hash: return Image_LoadKTX(handle);
-		default:return nullptr;
+			case "basis"_hash:
+			case "basisu"_hash: return Image_LoadBasisU(handle);
+			case "dds"_hash:return Image_LoadDDS(handle);
+			case "pvr"_hash:return Image_LoadPVR(handle);
+			case "exr"_hash:return Image_LoadEXR(handle);
+			case "hdr"_hash:return Image_LoadHDR(handle);
+			case "jpg"_hash:
+			case "jpeg"_hash:
+			case "png"_hash:
+			case "tga"_hash:
+			case "bmp"_hash:
+			case "psd"_hash:
+			case "gif"_hash:
+			case "pic"_hash:
+			case "pnm"_hash:
+			case "ppm"_hash:return Image_LoadLDR(handle);
+				//case "ktx2"_hash:
+			case "ktx"_hash: return Image_LoadKTX(handle);
+			default:return nullptr;
 		}
 	} else {
 		return nullptr;

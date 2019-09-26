@@ -1,6 +1,4 @@
 #pragma once
-#ifndef GFX_IMAGEIO_IO_H
-#define GFX_IMAGEIO_IO_H
 
 #include "al2o3_platform/platform.h"
 #include "gfx_image/image.h"
@@ -12,6 +10,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadLDR(VFile_Handle handle);
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadHDR(VFile_Handle handle);
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle);
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadKTX(VFile_Handle handle);
+AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadBasisU(VFile_Handle handle);
 
 AL2O3_EXTERN_C bool Image_SaveAsDDS(Image_ImageHeader const *image, VFile_Handle handle);
 AL2O3_EXTERN_C bool Image_SaveAsTGA(Image_ImageHeader const *image, VFile_Handle handle);
@@ -31,5 +30,3 @@ AL2O3_EXTERN_C bool Image_CanSaveAsKTX(Image_ImageHeader const *image);
 
 // try to figure out which format the file is in and load it
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle);
-
-#endif //WYRD_IMAGE_IO_HPP
