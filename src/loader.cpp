@@ -49,7 +49,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadPVR(VFile_Handle handle) {
 	// - it's assumed that the texture is already twiddled (ie. Morton).  This should always be the case for PVRTC V3.
 
 	PVR_Texture_Header header;
-	VFile::File *file = VFile::File::FromHandle(handle);
+	VFile::File *file = VFile::FromHandle(handle);
 	file->Read(&header, sizeof(header));
 
 	if (header.mVersion != gPvrtexV3HeaderVersion) {
@@ -209,7 +209,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadHDR(VFile_Handle handle) {
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadEXR(VFile_Handle handle) {
-	VFile::File *file = VFile::File::FromHandle(handle);
+	VFile::File *file = VFile::FromHandle(handle);
 
 	using namespace tinyexr;
 	EXRVersion version;
@@ -580,7 +580,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_LoadBasisU(VFile_Handle handle) {
 }
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_Load(VFile_Handle handle) {
-	VFile::File *file = VFile::File::FromHandle(handle);
+	VFile::File *file = VFile::FromHandle(handle);
 	tinystl::string name = file->GetName();
 	name = name.to_lower();
 	if (auto pos = name.rfind('.')) {
